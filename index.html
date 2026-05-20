@@ -3,32 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Devy - Web coding</title>
+    <title>Devy Pro - Web Coding</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            /* Colores Originales VS Code (Azul/Oscuro) */
-            --bg-main: #1e1e1e;
-            --bg-sidebar: #252526;
-            --bg-activity: #333333;
-            --bg-terminal: #1e1e1e;
-            --bg-tabs: #2d2d2d;
-            --bg-tab-active: #1e1e1e;
-            --bg-context: #2b2b2c;
-            --bg-suggest: #252526;
+            /* Paleta VS Code Pro redondeada */
+            --bg-main: #1c1c1e;
+            --bg-sidebar: #242426;
+            --bg-activity: #2c2c2e;
+            --bg-terminal: #171718;
+            --bg-tabs: #2a2a2c;
+            --bg-tab-active: #1c1c1e;
+            --bg-context: #2d2d30;
+            --bg-suggest: rgba(43, 43, 44, 0.95);
             
             --accent: #007acc; 
             --accent-hover: #1f85de;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-main: #cccccc;
-            --text-muted: #858585;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --text-main: #d4d4d4;
+            --text-muted: #8e8e93;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 4px;
             
-            --font-ui: 'Inter', 'Segoe UI', sans-serif;
+            --font-ui: 'Inter', sans-serif;
             --font-mono: 'Fira Code', monospace;
-            --font-logo: 'Outfit', sans-serif; /* Nueva tipografía profesional */
+            --font-logo: 'Outfit', sans-serif;
         }
 
         * {
@@ -39,15 +42,45 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Scrollbars Estilo VS Code */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         body {
             font-family: var(--font-ui);
-            background-color: var(--bg-main);
+            background-color: #121212;
             color: var(--text-main);
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            padding: 6px; /* Efecto ventana flotante estética */
+        }
+
+        /* Contenedor Principal Redondeado */
+        .window-frame {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background-color: var(--bg-main);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
+            position: relative;
         }
 
         .app-container {
@@ -57,16 +90,16 @@
             position: relative;
         }
 
-        /* 1. BARRA DE ACTIVIDAD */
+        /* 1. BARRA DE ACTIVIDAD (Izquierda) */
         .activity-bar {
-            width: 48px;
+            width: 56px;
             background-color: var(--bg-activity);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 0;
+            padding: 10px 0;
             z-index: 10;
         }
 
@@ -74,75 +107,90 @@
             display: flex;
             flex-direction: column;
             width: 100%;
+            gap: 6px;
+            align-items: center;
         }
 
         .activity-btn {
             position: relative;
-            width: 100%;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.15s ease, background-color 0.15s;
+            border-radius: var(--radius-md);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .activity-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.02); }
-        .activity-btn.active { color: #ffffff; background-color: rgba(255, 255, 255, 0.05); }
+        .activity-btn:hover { 
+            color: #ffffff; 
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: scale(1.04);
+        }
+        
+        .activity-btn.active { 
+            color: #ffffff; 
+            background-color: rgba(0, 122, 204, 0.15); 
+        }
 
-        .activity-btn.active::before {
+        .activity-btn::after {
             content: '';
             position: absolute;
-            left: 0; top: 0; height: 100%; width: 2px;
+            left: -4px; top: 25%; height: 50%; width: 3px;
             background-color: var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
+        .activity-btn.active::after { opacity: 1; }
 
         /* LOGO DEVY PREMIUM */
         .brand-logo {
             font-family: var(--font-logo);
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
-            padding: 16px 20px;
+            padding: 14px 20px;
             background-color: var(--bg-sidebar);
             border-bottom: 1px solid var(--border-color);
             letter-spacing: -0.5px;
-            line-height: 1;
-            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .brand-logo .colored { color: var(--accent); }
         .brand-logo .white { color: #ffffff; }
 
         /* 2. BARRA LATERAL (Sidebar) */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
         }
 
         .sidebar-header {
-            padding: 0 12px 0 20px;
+            padding: 0 16px;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 38px;
+            height: 40px;
         }
 
-        .sidebar-tools { display: flex; gap: 4px; }
+        .sidebar-tools { display: flex; gap: 6px; }
 
         .tool-btn {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -150,56 +198,107 @@
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.2s, background-color 0.2s;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
         }
-        .tool-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.05); }
+        .tool-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.08); }
 
-        .sidebar-content { flex: 1; overflow-y: auto; }
+        .sidebar-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 8px 0;
+        }
 
-        .panel-section { display: none; padding: 10px 0; }
-        .panel-section.active { display: block; animation: panelFade 0.2s ease-in-out; }
+        .panel-section { display: none; height: 100%; flex-direction: column; }
+        .panel-section.active { display: flex; animation: panelFade 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        @keyframes panelFade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes panelFade { 
+            from { opacity: 0; transform: translateX(-6px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
 
         /* Árbol de archivos */
         .tree-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 6px 12px 6px 20px;
+            padding: 8px 16px;
             cursor: pointer;
             font-size: 13px;
             color: var(--text-main);
-            position: relative;
-            transition: background-color 0.15s;
+            margin: 2px 8px;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s;
         }
-        .tree-item:hover { background-color: rgba(255, 255, 255, 0.03); }
-        .tree-item.active { background-color: rgba(0, 122, 204, 0.12); color: #ffffff; }
-        .tree-item.active::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background-color: var(--accent);
-        }
+        .tree-item:hover { background-color: rgba(255, 255, 255, 0.04); }
+        .tree-item.active { background-color: rgba(0, 122, 204, 0.14); color: #ffffff; }
 
-        .file-info { display: flex; align-items: center; gap: 8px; }
+        .file-info { display: flex; align-items: center; gap: 10px; }
         .icon-file { color: #e34c26; }
-        .icon-generic { color: #569cd6; }
+        .icon-js { color: #f7df1e; }
+        .icon-css { color: #264de4; }
+        .icon-generic { color: var(--accent); }
 
-        .file-options-trigger { opacity: 0; color: var(--text-muted); transition: opacity 0.2s, color 0.2s; }
+        .file-options-trigger { opacity: 0; color: var(--text-muted); transition: opacity 0.2s; }
         .tree-item:hover .file-options-trigger { opacity: 1; }
-        .file-options-trigger:hover { color: #ffffff; }
 
-        /* Inputs */
-        .search-input-box { padding: 0 20px; margin-bottom: 12px; }
+        /* Contenedor de Extensiones */
+        .extension-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin: 8px 12px;
+            display: flex;
+            gap: 12px;
+            align-items: start;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .extension-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-1px);
+        }
+        .ext-icon {
+            padding: 6px;
+            background: rgba(0, 122, 204, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--accent);
+        }
+        .ext-info { flex: 1; }
+        .ext-title { font-size: 13px; font-weight: 600; color: #ffffff; }
+        .ext-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+        .ext-btn {
+            margin-top: 8px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            background: var(--accent);
+            color: white;
+            transition: background 0.2s;
+        }
+        .ext-btn.installed {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        /* Inputs Modernos */
+        .search-input-box { padding: 8px 12px; }
         .sidebar-input {
             width: 100%;
-            background: #3c3c3c;
-            border: 1px solid #6b6b6b;
+            background: #2d2d30;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
             color: #ffffff;
-            padding: 6px 8px;
+            padding: 8px 10px;
             font-size: 12px;
             outline: none;
+            transition: border-color 0.2s;
         }
         .sidebar-input:focus { border-color: var(--accent); }
-        .panel-placeholder { padding: 20px; color: var(--text-muted); font-size: 12px; }
+        .panel-placeholder { padding: 16px; color: var(--text-muted); font-size: 12px; text-align: center; }
 
         /* ÁREA DEL EDITOR */
         .main-editor-zone {
@@ -212,10 +311,12 @@
         }
 
         .tabs-bar {
-            height: 35px;
+            height: 40px;
             background-color: var(--bg-tabs);
             display: flex;
             overflow-x: auto;
+            align-items: flex-end;
+            padding-left: 6px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -223,19 +324,23 @@
             display: flex;
             align-items: center;
             padding: 0 16px;
-            height: 100%;
-            background-color: var(--bg-tabs);
-            border-right: 1px solid var(--border-color);
+            height: 34px;
+            background-color: rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
             color: var(--text-muted);
             font-size: 13px;
             cursor: pointer;
             gap: 8px;
-            position: relative;
-            transition: background-color 0.15s, color 0.15s;
+            margin-right: 4px;
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all 0.2s;
         }
-        .tab.active { background-color: var(--bg-tab-active); color: #ffffff; }
-        .tab.active::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background-color: var(--accent);
+        .tab.active { 
+            background-color: var(--bg-tab-active); 
+            color: #ffffff;
+            border-color: var(--border-color);
+            font-weight: 500;
         }
 
         .editor-workspace {
@@ -249,11 +354,11 @@
             width: 100%;
             height: 100%;
             background: transparent;
-            color: #ffffff;
+            color: #9cdcfe;
             font-family: var(--font-mono);
-            font-size: 15px;
-            line-height: 1.5;
-            padding: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 16px;
             border: none;
             resize: none;
             outline: none;
@@ -261,46 +366,60 @@
             user-select: text;
         }
 
-        /* 💡 CUADRO DE SUGERENCIAS INTELLISENSE (Estilo VS Code) */
+        /* 💡 INTELLISENSE REDONDEADO Y PREMIUM */
         .suggest-widget {
             position: absolute;
             background-color: var(--bg-suggest);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             z-index: 1000;
-            width: 280px;
-            max-height: 180px;
+            width: 320px;
+            max-height: 220px;
             overflow-y: auto;
             display: none;
+            animation: suggestPop 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        @keyframes suggestPop {
+            from { transform: translateY(5px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .suggest-item {
-            padding: 5px 12px;
+            padding: 8px 12px;
             font-size: 13px;
             font-family: var(--font-mono);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.1s;
         }
+        .suggest-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+        .suggest-item:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+
         .suggest-item:hover, .suggest-item.selected {
             background-color: var(--accent);
             color: #ffffff !important;
         }
-        .suggest-item .tag-label { color: #569cd6; }
-        .suggest-item .type-label { color: var(--text-muted); font-size: 11px; font-family: var(--font-ui); }
-        .suggest-item:hover .type-label, .suggest-item.selected .type-label { color: #e2e2e2; }
+        .suggest-item .tag-label { color: #4fc1ff; }
+        .suggest-item.selected .tag-label { color: white; }
+        .suggest-item .type-label { color: var(--text-muted); font-size: 11px; font-family: var(--font-ui); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
 
-        /* MENÚ CONTEXTUAL OPCONES */
+        /* MENÚ CONTEXTUAL */
         .context-menu {
             position: absolute;
             background-color: var(--bg-context);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             z-index: 100;
-            width: 130px;
+            width: 165px;
             display: none;
-            animation: menuScale 0.12s ease-out;
+            padding: 4px;
+            animation: menuScale 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes menuScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
@@ -312,12 +431,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            border-radius: var(--radius-sm);
         }
         .context-menu-item:hover { background-color: var(--accent); }
 
-        /* TERMINAL INFERIOR */
+        /* TERMINAL INFERIOR REDONDEADA */
         .bottom-panel {
-            height: 140px;
+            height: 160px;
             background-color: var(--bg-terminal);
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -325,41 +445,38 @@
         }
 
         .panel-tabs {
-            height: 30px;
+            height: 34px;
             background-color: var(--bg-sidebar);
             display: flex;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 16px;
             gap: 20px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .panel-tab { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; }
+        .panel-tab { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; }
         .panel-tab.active { color: #ffffff; position: relative; height: 100%; display: flex; align-items: center; }
         .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
-        .panel-body { flex: 1; padding: 10px 20px; font-family: var(--font-mono); font-size: 12px; color: #10b981; overflow-y: auto; white-space: pre-line;}
+        .panel-body { flex: 1; padding: 12px 16px; font-family: var(--font-mono); font-size: 12px; color: #34d399; overflow-y: auto; white-space: pre-line;}
 
-        /* 🔵 BARRA DE ESTADO INFERIOR PREMIUM */
+        /* 🔵 BARRA DE ESTADO INFERIOR SIEMPRE VISIBLE */
         .status-bar {
-            height: 24px;
+            height: 26px;
             background-color: var(--accent);
             color: #ffffff;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 12px;
-            font-size: 12px;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 11px;
             z-index: 100;
         }
 
-        .status-left, .status-right { display: flex; align-items: center; gap: 16px; }
-        .status-item { display: flex; align-items: center; gap: 5px; cursor: pointer; height: 24px; padding: 0 6px; transition: background-color 0.2s; }
+        .status-left, .status-right { display: flex; align-items: center; gap: 14px; }
+        .status-item { display: flex; align-items: center; gap: 6px; cursor: pointer; height: 26px; padding: 0 8px; transition: background-color 0.2s; }
         .status-item:hover { background-color: rgba(255, 255, 255, 0.15); }
-        .status-item.live-btn { background-color: rgba(0, 0, 0, 0.2); padding: 0 12px; font-weight: 500; }
-        .status-item.live-btn.running { background-color: #1f85de; animation: pulseGlow 2s infinite; }
+        .status-item.live-btn { background-color: rgba(0, 0, 0, 0.2); font-weight: 600; }
+        .status-item.live-btn.running { background-color: #22c55e; animation: pulseGlow 2s infinite; }
 
         @keyframes pulseGlow {
             0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.9; }
@@ -368,82 +485,107 @@
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <aside class="activity-bar">
-            <div class="activity-group">
-                <div class="activity-btn active" data-target="explorer" title="Explorador">
-                    <i data-lucide="files" size="22"></i>
-                </div>
-                <div class="activity-btn" data-target="search" title="Buscar">
-                    <i data-lucide="search" size="22"></i>
-                </div>
-                <div class="activity-btn" data-target="extensions" title="Extensiones">
-                    <i data-lucide="blocks" size="22"></i>
-                </div>
-            </div>
-            <div class="activity-group">
-                <div class="activity-btn" title="Configuración">
-                    <i data-lucide="settings" size="22"></i>
-                </div>
-            </div>
-        </aside>
-
-        <aside class="sidebar">
+    <div class="window-frame">
+        <div class="app-container">
             
-            <div class="brand-logo">
-                <span class="colored">De</span><span class="white">vy</span>
-            </div>
-            
-            <div id="panel-explorer" class="panel-section active">
-                <div class="sidebar-header">
-                    <span>EXPLORADOR</span>
-                    <div class="sidebar-tools">
-                        <button class="tool-btn" id="newFileBtn" title="Nuevo Archivo...">
-                            <i data-lucide="file-plus" size="14"></i>
-                        </button>
+            <aside class="activity-bar">
+                <div class="activity-group">
+                    <div class="activity-btn active" data-target="explorer" title="Explorador">
+                        <i data-lucide="files" size="20"></i>
+                    </div>
+                    <div class="activity-btn" data-target="search" title="Buscar">
+                        <i data-lucide="search" size="20"></i>
+                    </div>
+                    <div class="activity-btn" data-target="extensions" title="Extensiones">
+                        <i data-lucide="blocks" size="20"></i>
                     </div>
                 </div>
-                <div class="sidebar-content" id="fileTreeContainer"></div>
-            </div>
-
-            <div id="panel-search" class="panel-section">
-                <div class="sidebar-header"><span>BUSCAR</span></div>
-                <div class="search-input-box">
-                    <input type="text" class="sidebar-input" placeholder="Buscar texto...">
+                <div class="activity-group">
+                    <div class="activity-btn" title="Configuración">
+                        <i data-lucide="settings" size="20"></i>
+                    </div>
                 </div>
-                <div class="panel-placeholder">Resultados indexados en tiempo real...</div>
-            </div>
+            </aside>
 
-            <div id="panel-extensions" class="panel-section">
-                <div class="sidebar-header"><span>MARKETPLACE</span></div>
-                <div class="search-input-box">
-                    <input type="text" class="sidebar-input" placeholder="Buscar extensiones...">
+            <aside class="sidebar">
+                <div class="brand-logo">
+                    <span class="colored">Devy</span><span class="white">Pro</span>
                 </div>
-                <div class="panel-placeholder">Todas las extensiones Pro configuradas.</div>
-            </div>
-        </aside>
-
-        <main class="main-editor-zone">
-            <div class="tabs-bar" id="tabsBar"></div>
-
-            <div class="editor-workspace">
-                <textarea class="code-textarea" id="editor" spellcheck="false" autocomplete="off"></textarea>
                 
-                <div class="suggest-widget" id="suggestWidget"></div>
-            </div>
+                <div id="panel-explorer" class="panel-section active">
+                    <div class="sidebar-header">
+                        <span>Explorador</span>
+                        <div class="sidebar-tools">
+                            <button class="tool-btn" id="newFileBtn" title="Nuevo Archivo...">
+                                <i data-lucide="file-plus" size="14"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sidebar-content" id="fileTreeContainer"></div>
+                </div>
 
-            <div class="bottom-panel">
-                <div class="panel-tabs">
-                    <div class="panel-tab active">Terminal</div>
-                    <div class="panel-tab">Problemas</div>
-                    <div class="panel-tab">Consola de Depuración</div>
+                <div id="panel-search" class="panel-section">
+                    <div class="sidebar-header"><span>Buscar global</span></div>
+                    <div class="search-input-box">
+                        <input type="text" class="sidebar-input" placeholder="Buscar texto en workspace...">
+                    </div>
+                    <div class="panel-placeholder">Resultados indexados en tiempo real...</div>
                 </div>
-                <div class="panel-body" id="terminalOutput">
-                    devy@workspace:~$ Entorno Devy Pro inicializado correctamente.
+
+                <div id="panel-extensions" class="panel-section">
+                    <div class="sidebar-header"><span>Marketplace</span></div>
+                    <div class="search-input-box">
+                        <input type="text" class="sidebar-input" id="extSearch" placeholder="Buscar extensiones...">
+                    </div>
+                    <div class="sidebar-content" id="extensionsContainer">
+                        </div>
+                </div>
+            </aside>
+
+            <main class="main-editor-zone">
+                <div class="tabs-bar" id="tabsBar"></div>
+
+                <div class="editor-workspace">
+                    <textarea class="code-textarea" id="editor" spellcheck="false" autocomplete="off" placeholder="/* Empieza a escribir código aquí... pulsa '<' o 'con' para ver las sugerencias de IntelliSense */"></textarea>
+                    
+                    <div class="suggest-widget" id="suggestWidget"></div>
+                </div>
+
+                <div class="bottom-panel">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active">Terminal</div>
+                        <div class="panel-tab">Problemas</div>
+                        <div class="panel-tab">Output</div>
+                    </div>
+                    <div class="panel-body" id="terminalOutput">
+                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima.
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="status-bar">
+            <div class="status-left">
+                <div class="status-item" style="background-color: rgba(0,0,0,0.15)">
+                    <i data-lucide="terminal" size="12"></i>
+                    <span>Pro Environment</span>
+                </div>
+                <div class="status-item">
+                    <i data-lucide="git-branch" size="12"></i>
+                    <span>main</span>
+                </div>
+                <div class="status-item live-btn" id="liveServerBtn">
+                    <i data-lucide="radio" size="12"></i>
+                    <span id="liveServerText">Go Live</span>
                 </div>
             </div>
-        </main>
+            <div class="status-right">
+                <div class="status-item" id="extIndicator">Ext: 0 Activas</div>
+                <div class="status-item">UTF-8</div>
+                <div class="status-item" id="engineIndicator">HTML Engine</div>
+                <div class="status-item"><i data-lucide="bell" size="12"></i></div>
+            </div>
+        </footer>
     </div>
 
     <div class="context-menu" id="customContextMenu">
@@ -452,59 +594,42 @@
         </div>
     </div>
 
-    <footer class="status-bar">
-        <div class="status-left">
-            <div class="status-item" style="background-color: rgba(0,0,0,0.15)">
-                <i data-lucide="terminal" size="12"></i>
-                <span>WS: Activo</span>
-            </div>
-            <div class="status-item">
-                <i data-lucide="git-branch" size="12"></i>
-                <span>main</span>
-            </div>
-            <div class="status-item">
-                <i data-lucide="refresh-cw" size="12"></i>
-            </div>
-            <div class="status-item live-btn" id="liveServerBtn">
-                <i data-lucide="radio" size="12" style="margin-right: 4px;"></i>
-                <span id="liveServerText">Go Live</span>
-            </div>
-        </div>
-        <div class="status-right">
-            <div class="status-item">Fila 1, Col 1</div>
-            <div class="status-item">Espacios: 4</div>
-            <div class="status-item">UTF-8</div>
-            <div class="status-item" id="engineIndicator">HTML Engine</div>
-            <div class="status-item">
-                <i data-lucide="bell" size="12"></i>
-            </div>
-        </div>
-    </footer>
-
     <script>
-        // Sistema de archivos interno interactivo
+        // Estructura de archivos inicial
         let fileSystem = {
-            'file_1': { name: 'index.html', content: 'Hello World' }
+            'file_1': { name: 'index.html', content: '<!DOCTYPE html>\n<html>\n<head>\n\t<title>Devy Pro</title>\n</head>\n<body>\n\t<h1>Hola Mundo desde Devy</h1>\n</body>\n</html>' },
+            'file_2': { name: 'styles.css', content: 'body {\n\tbackground: #121212;\n\tcolor: white;\n}' }
         };
         let activeFileId = 'file_1';
         let contextTargetFileId = null;
         let liveWindow = null;
 
-        // Base de Datos de Sugerencias Avanzadas (IntelliSense)
+        // Base de Datos de Extensiones Reales e Instalables
+        let extensionsData = [
+            { id: 'prettier', name: 'Prettier Formatter', desc: 'Formatea automáticamente tu código al guardar o escribir.', installed: false, type: 'formatter' },
+            { id: 'brackets', name: 'Bracket Pair Colorizer', desc: 'Colorea corchetes y llaves para no perderte.', installed: false, type: 'ui' },
+            { id: 'materialIcons', name: 'Material Icon Theme', desc: 'Cambia los iconos genéricos por los oficiales detallados.', installed: false, type: 'icons' },
+            { id: 'autoprefixer', name: 'CSS Auto-Prefixer', desc: 'Añade sugerencias avanzadas de Webkit/Moz a tu CSS.', installed: false, type: 'suggest' }
+        ];
+
+        // Diccionario Avanzado de Sugerencias IntelliSense Mejorado
         const suggestionsDictionary = [
-            { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Snippet' },
-            { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag HTML' },
-            { trigger: '<div', replace: '<div>$0</div>', label: '<div>', type: 'Tag HTML' },
-            { trigger: '<span', replace: '<span>$0</span>', label: '<span>', type: 'Tag HTML' },
-            { trigger: '<p', replace: '<p>$0</p>', label: '<p>', type: 'Tag HTML' },
-            { trigger: '<script', replace: '<script>\n\t$0\n<\/script>', label: '<script>', type: 'Script Tag' },
-            { trigger: '<style', replace: '<style>\n\t$0\n<\/style>', label: '<style>', type: 'Style Tag' },
-            { trigger: '<h1', replace: '<h1>$0</h1>', label: '<h1>', type: 'Heading 1' },
-            { trigger: '<h2', replace: '<h2>$0</h2>', label: '<h2>', type: 'Heading 2' },
-            { trigger: '<a', replace: '<a href="$0"></a>', label: '<a>', type: 'Anchor Link' },
-            { trigger: '<img', replace: '<img src="$0" alt="">', label: '<img>', type: 'Image Element' },
-            { trigger: '<ul', replace: '<ul>\n\t<li>$0</li>\n</ul>', label: '<ul>', type: 'List Container' },
-            { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Method' }
+            // HTML structural
+            { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t$0\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Estructura' },
+            { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag Base' },
+            { trigger: '<div', replace: '<div class="$0"></div>', label: '<div> con clase', type: 'Contenedor' },
+            { trigger: '<section', replace: '<section id="$0">\n\t\n</section>', label: '<section>', type: 'Semántico' },
+            { trigger: '<script', replace: '<script src="$0"><\/script>', label: '<script src="">', type: 'Enlace Script' },
+            { trigger: '<link', replace: '<link rel="stylesheet" href="$0">', label: '<link css>', type: 'Enlace CSS' },
+            // JS Suggestions
+            { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Output' },
+            { trigger: 'addEventListener', replace: 'addEventListener(\'$0\', (e) => {\n\t\n});', label: 'addEventListener', type: 'JS Evento' },
+            { trigger: 'fetch', replace: 'fetch(\'$0\')\n\t.then(res => res.json())\n\t.then(data => console.log(data));', label: 'fetch() API', type: 'JS Async' },
+            { trigger: 'function', replace: 'function $0() {\n\t\n}', label: 'function standard', type: 'JS Estructura' },
+            // CSS Suggestions (Disponibles por defecto o expandidas por extensión)
+            { trigger: 'display: flex', replace: 'display: flex;\njustify-content: center;\nalign-items: center;$0', label: 'flex-center', type: 'CSS Layout' },
+            { trigger: 'box-shadow', replace: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);$0', label: 'box-shadow premium', type: 'CSS Efecto' },
+            { trigger: 'background-image', replace: 'background: linear-gradient(135deg, #007acc, #1f85de);$0', label: 'gradient-blue', type: 'CSS Diseño' }
         ];
 
         let selectedSuggestIndex = 0;
@@ -522,8 +647,10 @@
         const terminalOutput = document.getElementById('terminalOutput');
         const engineIndicator = document.getElementById('engineIndicator');
         const suggestWidget = document.getElementById('suggestWidget');
+        const extensionsContainer = document.getElementById('extensionsContainer');
+        const extIndicator = document.getElementById('extIndicator');
 
-        // Control Pestañas Sidebar
+        // Control de Pestañas Sidebar (Cambio de vistas con animaciones suaves)
         document.querySelectorAll('.activity-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const target = btn.getAttribute('data-target');
@@ -539,23 +666,32 @@
             renderFileTree();
             renderTabs();
             loadActiveFile();
+            renderExtensions();
         }
 
         function renderFileTree() {
             fileTreeContainer.innerHTML = '';
             for (let id in fileSystem) {
                 const file = fileSystem[id];
-                const isHtml = file.name.endsWith('.html');
+                const hasIconsExt = extensionsData.find(e => e.id === 'materialIcons').installed;
+                
+                let iconName = 'file';
+                let iconClass = 'icon-generic';
+                
+                if (file.name.endsWith('.html')) { iconName = 'file-code'; iconClass = 'icon-file'; }
+                else if (file.name.endsWith('.js')) { iconName = hasIconsExt ? 'braces' : 'file'; iconClass = 'icon-js'; }
+                else if (file.name.endsWith('.css')) { iconName = hasIconsExt ? 'palette' : 'file'; iconClass = 'icon-css'; }
+
                 const div = document.createElement('div');
                 div.className = `tree-item ${id === activeFileId ? 'active' : ''}`;
                 div.setAttribute('data-id', id);
                 div.innerHTML = `
                     <div class="file-info">
-                        <i data-lucide="${isHtml ? 'file-code' : 'file'}" size="14" class="${isHtml ? 'icon-file' : 'icon-generic'}"></i>
+                        <i data-lucide="${iconName}" size="15" class="${iconClass}"></i>
                         <span>${file.name}</span>
                     </div>
                     <div class="file-options-trigger" data-id="${id}">
-                        <i data-lucide="more-vertical" size="14"></i>
+                        <i data-lucide="more-horizontal" size="14"></i>
                     </div>
                 `;
                 div.addEventListener('click', (e) => {
@@ -572,7 +708,7 @@
                     contextTargetFileId = trigger.getAttribute('data-id');
                     const rect = trigger.getBoundingClientRect();
                     customContextMenu.style.top = `${rect.bottom + window.scrollY}px`;
-                    customContextMenu.style.left = `${rect.left - 110 + window.scrollX}px`;
+                    customContextMenu.style.left = `${rect.left - 120 + window.scrollX}px`;
                     customContextMenu.style.display = 'block';
                 });
             });
@@ -581,34 +717,83 @@
 
         function renderTabs() {
             tabsBar.innerHTML = '';
-            if(fileSystem[activeFileId]) {
-                const file = fileSystem[activeFileId];
-                const isHtml = file.name.endsWith('.html');
-                const tab = document.createElement('div');
-                tab.className = 'tab active';
-                tab.innerHTML = `
-                    <i data-lucide="${isHtml ? 'file-code' : 'file'}" size="12" class="${isHtml ? 'icon-file' : 'icon-generic'}"></i>
-                    <span>${file.name}</span>
-                `;
-                tabsBar.appendChild(tab);
+            for (let id in fileSystem) {
+                const file = fileSystem[id];
+                if(id === activeFileId) {
+                    const tab = document.createElement('div');
+                    tab.className = 'tab active';
+                    tab.innerHTML = `<span>${file.name}</span>`;
+                    tabsBar.appendChild(tab);
+                }
             }
-            lucide.createIcons();
         }
 
         function loadActiveFile() {
             if (fileSystem[activeFileId]) {
                 editor.value = fileSystem[activeFileId].content;
                 editor.disabled = false;
-                engineIndicator.innerText = fileSystem[activeFileId].name.endsWith('.html') ? 'HTML Engine' : 'Plain Text';
+                if (fileSystem[activeFileId].name.endsWith('.html')) engineIndicator.innerText = 'HTML V8 Engine';
+                else if (fileSystem[activeFileId].name.endsWith('.css')) engineIndicator.innerText = 'CSS Compiler';
+                else engineIndicator.innerText = 'JS Runtime';
             } else {
                 editor.value = '';
                 editor.disabled = true;
-                engineIndicator.innerText = 'Empty';
+                engineIndicator.innerText = 'Null';
             }
             closeSuggestions();
         }
 
-        // Lógica de Autocompletado IntelliSense Integrada
+        // Renderizado del Marketplace de Extensiones
+        function renderExtensions() {
+            extensionsContainer.innerHTML = '';
+            let activeCount = 0;
+            
+            extensionsData.forEach(ext => {
+                if (ext.installed) activeCount++;
+                const card = document.createElement('div');
+                card.className = 'extension-card';
+                card.innerHTML = `
+                    <div class="ext-icon"><i data-lucide="puzzle" size="18"></i></div>
+                    <div class="ext-info">
+                        <div class="ext-title">${ext.name}</div>
+                        <div class="ext-desc">${ext.desc}</div>
+                        <button class="ext-btn ${ext.installed ? 'installed' : ''}" data-id="${ext.id}">
+                            ${ext.installed ? 'Desinstalar' : 'Instalar'}
+                        </button>
+                    </div>
+                `;
+                extensionsContainer.appendChild(card);
+            });
+
+            extIndicator.innerText = `Ext: ${activeCount} Activas`;
+
+            document.querySelectorAll('.ext-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = btn.getAttribute('data-id');
+                    const ext = extensionsData.find(e => e.id === id);
+                    ext.installed = !ext.installed;
+                    
+                    // Efectos en tiempo real de las extensiones
+                    if (ext.installed) {
+                        terminalOutput.innerText += `\n📦 [Extensiones] "${ext.name}" activada con éxito.`;
+                        if (ext.id === 'prettier') {
+                            // Acción Prettier: Formatea al instante
+                            if(fileSystem[activeFileId]) {
+                                fileSystem[activeFileId].content = fileSystem[activeFileId].content.trim();
+                                loadActiveFile();
+                            }
+                        }
+                    } else {
+                        terminalOutput.innerText += `\n❌ [Extensiones] Desinstalada: ${ext.name}`;
+                    }
+                    
+                    renderWorkspace();
+                });
+            });
+            lucide.createIcons();
+        }
+
+        // Lógica de Autocompletado IntelliSense Pro
         editor.addEventListener('input', (e) => {
             if (!fileSystem[activeFileId]) return;
             fileSystem[activeFileId].content = editor.value;
@@ -617,12 +802,17 @@
             const text = editor.value;
             const cursorPos = editor.selectionStart;
             
-            // Obtener la palabra actual que se está escribiendo
             const lastWords = text.substring(0, cursorPos).split(/[\s\n]/);
             const currentWord = lastWords[lastWords.length - 1].toLowerCase();
 
-            if (currentWord.length >= 2) {
-                currentFilteredSuggests = suggestionsDictionary.filter(item => item.trigger.startsWith(currentWord));
+            // Extensión de prefijos CSS activada
+            let finalDict = [...suggestionsDictionary];
+            if (extensionsData.find(e => e.id === 'autoprefixer').installed) {
+                finalDict.push({ trigger: 'display: flex', replace: 'display: -webkit-box;\ndisplay: -ms-flexbox;\ndisplay: flex;', label: '-webkit-flex-box', type: 'Autoprefixer' });
+            }
+
+            if (currentWord.length >= 1) {
+                currentFilteredSuggests = finalDict.filter(item => item.trigger.startsWith(currentWord));
                 if (currentFilteredSuggests.length > 0) {
                     showSuggestions(currentFilteredSuggests);
                     return;
@@ -631,7 +821,7 @@
             closeSuggestions();
         });
 
-        // Captura de Teclas Especiales en el Editor (Navegar sugerencias con flechas y aceptar con Tab/Enter)
+        // Controles de teclado para el IntelliSense
         editor.addEventListener('keydown', (e) => {
             if (suggestWidget.style.display === 'block') {
                 if (e.key === 'ArrowDown') {
@@ -666,17 +856,21 @@
                 suggestWidget.appendChild(row);
             });
 
-            // Posicionar de manera adaptativa abajo del cursor de escritura aproximado
-            suggestWidget.style.left = `40px`;
-            suggestWidget.style.top = `100px`;
+            // Posicionamiento calculado adaptativo flotante inteligente
+            suggestWidget.style.left = `24px`;
+            suggestWidget.style.bottom = `190px`; 
             suggestWidget.style.display = 'block';
         }
 
         function updateSuggestionSelection() {
             const rows = suggestWidget.querySelectorAll('.suggest-item');
             rows.forEach((row, idx) => {
-                if (idx === selectedSuggestIndex) row.classList.add('selected');
-                else row.classList.remove('selected');
+                if (idx === selectedSuggestIndex) {
+                    row.classList.add('selected');
+                    row.scrollIntoView({ block: 'nearest' });
+                } else {
+                    row.classList.remove('selected');
+                }
             });
         }
 
@@ -687,7 +881,7 @@
             const currentWord = lastLines[lastLines.length - 1];
 
             const startPos = cursorPos - currentWord.length;
-            const cleanSnippet = item.replace.replace('$0', ''); // Limpieza básica de cursores de inserción
+            const cleanSnippet = item.replace.replace('$0', '');
 
             editor.value = text.substring(0, startPos) + cleanSnippet + text.substring(cursorPos);
             editor.selectionStart = editor.selectionEnd = startPos + cleanSnippet.length;
@@ -698,22 +892,20 @@
             editor.focus();
         }
 
-        function closeSuggestions() {
-            suggestWidget.style.display = 'none';
-        }
+        function closeSuggestions() { suggestWidget.style.display = 'none'; }
 
-        // Crear Nuevos Archivos
+        // Crear nuevos archivos dinámicamente
         newFileBtn.addEventListener('click', () => {
-            const fileName = prompt('Nombre del nuevo archivo (ej: index.html, script.js):');
+            const fileName = prompt('Nombre del nuevo archivo (ej: app.js, layout.css):');
             if (!fileName) return;
             const newId = 'file_' + Date.now();
             fileSystem[newId] = { name: fileName, content: '' };
             activeFileId = newId;
             renderWorkspace();
-            terminalOutput.innerText += `\ndevy@workspace:~$ Creado el archivo ${fileName}`;
+            terminalOutput.innerText += `\ndevy@workspace:~$ touch ${fileName} (Creado correctamente)`;
         });
 
-        // Eliminar Archivos
+        // Eliminar archivos desde el menú contextual
         deleteFileAction.addEventListener('click', () => {
             if (!contextTargetFileId) return;
             const name = fileSystem[contextTargetFileId].name;
@@ -724,22 +916,22 @@
             }
             customContextMenu.style.display = 'none';
             renderWorkspace();
-            terminalOutput.innerText += `\ndevy@workspace:~$ Eliminado el archivo ${name}`;
+            terminalOutput.innerText += `\ndevy@workspace:~$ rm -rf ${name} (Eliminado)`;
         });
 
         document.addEventListener('click', () => { customContextMenu.style.display = 'none'; });
 
-        // Servidor en Vivo Remoto
+        // Servidor Remoto / Live Server Integrado
         liveServerBtn.addEventListener('click', () => {
             if (!activeFileId || !fileSystem[activeFileId]) return;
             if (!liveWindow || liveWindow.closed) {
                 liveWindow = window.open('', '_blank');
                 if (liveWindow) {
                     liveServerBtn.classList.add('running');
-                    liveServerText.innerText = "Port: 5500";
-                    terminalOutput.innerText += "\n📡 [Live Server] Escuchando cambios en tiempo real en puerto 5500.";
+                    liveServerText.innerText = "Port: 5550";
+                    terminalOutput.innerText += "\n📡 [Live Server] Live Server Activo en http://127.0.0.1:5550";
                 } else {
-                    alert("Permite ventanas emergentes.");
+                    alert("Por favor, permite las ventanas emergentes en tu navegador.");
                     return;
                 }
             }
@@ -763,7 +955,7 @@
                 liveWindow = null;
                 liveServerBtn.classList.remove('running');
                 liveServerText.innerText = "Go Live";
-                terminalOutput.innerText += "\n❌ [Live Server] Sesión terminada.";
+                terminalOutput.innerText += "\n❌ [Live Server] Conexión cerrada remota.";
             }
         }, 1000);
 
