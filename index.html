@@ -350,12 +350,54 @@
             position: relative;
         }
 
-        /* Nuevo contenedor obligatorio de Mónaco (reemplaza al textarea viejo) */
+        /* Nuevo Contenedor de Monaco Engine */
         #editor-container {
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
+
+        /* 💡 INTELLISENSE REDONDEADO Y PREMIUM (Mantenido por compatibilidad visual) */
+        .suggest-widget {
+            position: absolute;
+            background-color: var(--bg-suggest);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            width: 320px;
+            max-height: 220px;
+            overflow-y: auto;
+            display: none;
+            animation: suggestPop 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        @keyframes suggestPop {
+            from { transform: translateY(5px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .suggest-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.1s;
+        }
+        .suggest-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+        .suggest-item:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+
+        .suggest-item:hover, .suggest-item.selected {
+            background-color: var(--accent);
+            color: #ffffff !important;
+        }
+        .suggest-item .tag-label { color: #4fc1ff; }
+        .suggest-item.selected .tag-label { color: white; }
+        .suggest-item .type-label { color: var(--text-muted); font-size: 11px; font-family: var(--font-ui); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
 
         /* MENÚ CONTEXTUAL */
         .context-menu {
@@ -408,7 +450,7 @@
         .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
         .panel-body { flex: 1; padding: 12px 16px; font-family: var(--font-mono); font-size: 12px; color: #34d399; overflow-y: auto; white-space: pre-line;}
 
-        /* BARRA DE ESTADO INFERIOR */
+        /* 🔵 BARRA DE ESTADO INFERIOR SIEMPRE VISIBLE */
         .status-bar {
             height: 26px;
             background-color: var(--accent);
@@ -486,7 +528,8 @@
                     <div class="search-input-box">
                         <input type="text" class="sidebar-input" id="extSearch" placeholder="Buscar extensiones...">
                     </div>
-                    <div class="sidebar-content" id="extensionsContainer"></div>
+                    <div class="sidebar-content" id="extensionsContainer">
+                        </div>
                 </div>
             </aside>
 
@@ -495,6 +538,8 @@
 
                 <div class="editor-workspace">
                     <div id="editor-container"></div>
+                    
+                    <div class="suggest-widget" id="suggestWidget"></div>
                 </div>
 
                 <div class="bottom-panel">
@@ -504,7 +549,7 @@
                         <div class="panel-tab">Output</div>
                     </div>
                     <div class="panel-body" id="terminalOutput">
-                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima con Monaco Engine.
+                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima.
                     </div>
                 </div>
             </main>
@@ -520,4 +565,335 @@
                     <i data-lucide="git-branch" size="12"></i>
                     <span>main</span>
                 </div>
-                <div class="status-
+                <div class="status-item live-btn" id="liveServerBtn">
+                    <i data-lucide="radio" size="12"></i>
+                    <span id="liveServerText">Go Live</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <div class="status-item" id="extIndicator">Ext: 0 Activas</div>
+                <div class="status-item">UTF-8</div>
+                <div class="status-item" id="engineIndicator">HTML Engine</div>
+                <div class="status-item"><i data-lucide="bell" size="12"></i></div>
+            </div>
+        </footer>
+    </div>
+
+    <div class="context-menu" id="customContextMenu">
+        <div class="context-menu-item" id="deleteFileAction">
+            <i data-lucide="trash-2" size="12"></i> Eliminar Archivo
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <script>
+        // Estructura de archivos inicial
+        let fileSystem = {
+            'file_1': { name: 'index.html', content: '<!DOCTYPE html>\n<html>\n<head>\n\t<title>Devy Pro</title>\n</head>\n<body>\n\t<h1>Hola Mundo desde Devy</h1>\n</body>\n</html>' },
+            'file_2': { name: 'styles.css', content: 'body {\n\tbackground: #121212;\n\tcolor: white;\n}' }
+        };
+        let activeFileId = 'file_1';
+        let contextTargetFileId = null;
+        let liveWindow = null;
+        let monacoEditorInstance = null; // Instancia global de Mónaco
+
+        // Base de Datos de Extensiones Reales e Instalables
+        let extensionsData = [
+            { id: 'prettier', name: 'Prettier Formatter', desc: 'Formatea automáticamente tu código al guardar o escribir.', installed: false, type: 'formatter' },
+            { id: 'brackets', name: 'Bracket Pair Colorizer', desc: 'Colorea corchetes y llaves para no perderte.', installed: false, type: 'ui' },
+            { id: 'materialIcons', name: 'Material Icon Theme', desc: 'Cambia los iconos genéricos por los oficiales detallados.', installed: false, type: 'icons' },
+            { id: 'autoprefixer', name: 'CSS Auto-Prefixer', desc: 'Añade sugerencias avanzadas de Webkit/Moz a tu CSS.', installed: false, type: 'suggest' }
+        ];
+
+        // Diccionario Avanzado de Sugerencias IntelliSense Mejorado
+        const suggestionsDictionary = [
+            // HTML structural
+            { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t$0\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Estructura' },
+            { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag Base' },
+            { trigger: '<div', replace: '<div class="$0"></div>', label: '<div> con clase', type: 'Contenedor' },
+            { trigger: '<section', replace: '<section id="$0">\n\t\n</section>', label: '<section>', type: 'Semántico' },
+            { trigger: '<script', replace: '<script src="$0"><\/script>', label: '<script src="">', type: 'Enlace Script' },
+            { trigger: '<link', replace: '<link rel="stylesheet" href="$0">', label: '<link css>', type: 'Enlace CSS' },
+            // JS Suggestions
+            { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Output' },
+            { trigger: 'addEventListener', replace: 'addEventListener(\'$0\', (e) => {\n\t\n});', label: 'addEventListener', type: 'JS Evento' },
+            { trigger: 'fetch', replace: 'fetch(\'$0\')\n\t.then(res => res.json())\n\t.then(data => console.log(data));', label: 'fetch() API', type: 'JS Async' },
+            { trigger: 'function', replace: 'function $0() {\n\t\n}', label: 'function standard', type: 'JS Estructura' },
+            // CSS Suggestions (Disponibles por defecto o expandidas por extensión)
+            { trigger: 'display: flex', replace: 'display: flex;\njustify-content: center;\nalign-items: center;$0', label: 'flex-center', type: 'CSS Layout' },
+            { trigger: 'box-shadow', replace: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);$0', label: 'box-shadow premium', type: 'CSS Efecto' },
+            { trigger: 'background-image', replace: 'background: linear-gradient(135deg, #007acc, #1f85de);$0', label: 'gradient-blue', type: 'CSS Diseño' }
+        ];
+
+        let selectedSuggestIndex = 0;
+        let currentFilteredSuggests = [];
+
+        // Elementos DOM
+        const fileTreeContainer = document.getElementById('fileTreeContainer');
+        const tabsBar = document.getElementById('tabsBar');
+        const newFileBtn = document.getElementById('newFileBtn');
+        const customContextMenu = document.getElementById('customContextMenu');
+        const deleteFileAction = document.getElementById('deleteFileAction');
+        const liveServerBtn = document.getElementById('liveServerBtn');
+        const liveServerText = document.getElementById('liveServerText');
+        const terminalOutput = document.getElementById('terminalOutput');
+        const engineIndicator = document.getElementById('engineIndicator');
+        const suggestWidget = document.getElementById('suggestWidget');
+        const extensionsContainer = document.getElementById('extensionsContainer');
+        const extIndicator = document.getElementById('extIndicator');
+
+        // Control de Pestañas Sidebar (Cambio de vistas con animaciones suaves)
+        document.querySelectorAll('.activity-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                if (!target) return;
+                document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+                document.getElementById(`panel-${target}`).classList.add('active');
+            });
+        });
+
+        // INICIALIZACIÓN CONFIGURACIÓN DE MONACO
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+        
+        require(['vs/editor/editor.main'], function() {
+            // Mapeamos tus snippets personalizados de JavaScript/HTML/CSS dentro del autocompletado inteligente de Monaco
+            monaco.languages.registerCompletionItemProvider('javascript', {
+                provideCompletionItems: () => {
+                    return { suggestions: suggestionsDictionary.map(s => ({
+                        label: s.label,
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        documentation: s.type,
+                        insertText: s.replace.replace('$0', ''),
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                    }))};
+                }
+            });
+            monaco.languages.registerCompletionItemProvider('html', {
+                provideCompletionItems: () => {
+                    return { suggestions: suggestionsDictionary.map(s => ({
+                        label: s.label,
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        documentation: s.type,
+                        insertText: s.replace.replace('$0', ''),
+                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                    }))};
+                }
+            });
+
+            // Creamos el workspace de Monaco en el contenedor vacío
+            monacoEditorInstance = monaco.editor.create(document.getElementById('editor-container'), {
+                theme: 'vs-dark',
+                fontSize: 14,
+                fontFamily: 'var(--font-mono)',
+                automaticLayout: true,
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: { other: true, comments: false, strings: false },
+                minimap: { enabled: true }
+            });
+
+            // Sincronización continua de cambios al objeto fileSystem
+            monacoEditorInstance.onDidChangeModelContent(() => {
+                if (fileSystem[activeFileId]) {
+                    fileSystem[activeFileId].content = monacoEditorInstance.getValue();
+                }
+            });
+
+            // Arrancamos el renderizado original
+            renderWorkspace();
+        });
+
+        function renderWorkspace() {
+            renderFileTree();
+            renderTabs();
+            loadActiveFile();
+            renderExtensions();
+        }
+
+        function renderFileTree() {
+            fileTreeContainer.innerHTML = '';
+            for (let id in fileSystem) {
+                const file = fileSystem[id];
+                const hasIconsExt = extensionsData.find(e => e.id === 'materialIcons').installed;
+                
+                let iconName = 'file';
+                let iconClass = 'icon-generic';
+                
+                if (file.name.endsWith('.html')) { iconName = 'file-code'; iconClass = 'icon-file'; }
+                else if (file.name.endsWith('.js')) { iconName = hasIconsExt ? 'braces' : 'file'; iconClass = 'icon-js'; }
+                else if (file.name.endsWith('.css')) { iconName = hasIconsExt ? 'palette' : 'file'; iconClass = 'icon-css'; }
+
+                const div = document.createElement('div');
+                div.className = `tree-item ${id === activeFileId ? 'active' : ''}`;
+                div.setAttribute('data-id', id);
+                div.innerHTML = `
+                    <div class="file-info">
+                        <i data-lucide="${iconName}" size="15" class="${iconClass}"></i>
+                        <span>${file.name}</span>
+                    </div>
+                    <div class="file-options-trigger" data-id="${id}">
+                        <i data-lucide="more-horizontal" size="14"></i>
+                    </div>
+                `;
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.file-options-trigger')) return;
+                    activeFileId = id;
+                    renderWorkspace();
+                });
+                fileTreeContainer.appendChild(div);
+            }
+
+            document.querySelectorAll('.file-options-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    contextTargetFileId = trigger.getAttribute('data-id');
+                    const rect = trigger.getBoundingClientRect();
+                    customContextMenu.style.top = `${rect.bottom + window.scrollY}px`;
+                    customContextMenu.style.left = `${rect.left - 120 + window.scrollX}px`;
+                    customContextMenu.style.display = 'block';
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function renderTabs() {
+            tabsBar.innerHTML = '';
+            for (let id in fileSystem) {
+                const file = fileSystem[id];
+                if(id === activeFileId) {
+                    const tab = document.createElement('div');
+                    tab.className = 'tab active';
+                    tab.innerHTML = `<span>${file.name}</span>`;
+                    tabsBar.appendChild(tab);
+                }
+            }
+        }
+
+        function getLangType(name) {
+            if (name.endsWith('.html')) return 'html';
+            if (name.endsWith('.css')) return 'css';
+            if (name.endsWith('.js')) return 'javascript';
+            return 'plaintext';
+        }
+
+        function loadActiveFile() {
+            if (!monacoEditorInstance) return;
+
+            if (fileSystem[activeFileId]) {
+                const file = fileSystem[activeFileId];
+                const currentLang = getLangType(file.name);
+                
+                // Mónaco asigna inteligentemente la sintaxis cambiando el modelo en vivo
+                const model = monaco.editor.createModel(file.content, currentLang);
+                monacoEditorInstance.setModel(model);
+
+                if (file.name.endsWith('.html')) engineIndicator.innerText = 'HTML V8 Engine';
+                else if (file.name.endsWith('.css')) engineIndicator.innerText = 'CSS Compiler';
+                else engineIndicator.innerText = 'JS Runtime';
+            } else {
+                monacoEditorInstance.setValue('');
+                engineIndicator.innerText = 'Null';
+            }
+            closeSuggestions();
+        }
+
+        // Renderizado del Marketplace de Extensiones
+        function renderExtensions() {
+            extensionsContainer.innerHTML = '';
+            let activeCount = 0;
+            
+            extensionsData.forEach(ext => {
+                if (ext.installed) activeCount++;
+                const card = document.createElement('div');
+                card.className = 'extension-card';
+                card.innerHTML = `
+                    <div class="ext-icon"><i data-lucide="puzzle" size="18"></i></div>
+                    <div class="ext-info">
+                        <div class="ext-title">${ext.name}</div>
+                        <div class="ext-desc">${ext.desc}</div>
+                        <button class="ext-btn ${ext.installed ? 'installed' : ''}" data-id="${ext.id}">
+                            ${ext.installed ? 'Desinstalar' : 'Instalar'}
+                        </button>
+                    </div>
+                `;
+                extensionsContainer.appendChild(card);
+            });
+
+            extIndicator.innerText = `Ext: ${activeCount} Activas`;
+
+            document.querySelectorAll('.ext-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = btn.getAttribute('data-id');
+                    const ext = extensionsData.find(e => e.id === id);
+                    ext.installed = !ext.installed;
+                    
+                    if (ext.installed) {
+                        terminalOutput.innerText += `\n📦 [Extensiones] "${ext.name}" activada con éxito.`;
+                    }
+                    renderWorkspace();
+                });
+            });
+            lucide.createIcons();
+        }
+
+        // Funciones heredadas de tu antiguo autocompletado (Mantenidas por seguridad y estabilidad estructural)
+        function closeSuggestions() {
+            suggestWidget.style.display = 'none';
+        }
+
+        // Crear Nuevo Archivo
+        newFileBtn.addEventListener('click', () => {
+            const name = prompt('Nombre del archivo:');
+            if(name) {
+                const id = 'file_' + Date.now();
+                fileSystem[id] = { name: name, content: '' };
+                activeFileId = id;
+                renderWorkspace();
+            }
+        });
+
+        // Menú contextual acciones
+        deleteFileAction.addEventListener('click', () => {
+            if(contextTargetFileId && Object.keys(fileSystem).length > 1) {
+                delete fileSystem[contextTargetFileId];
+                if(activeFileId === contextTargetFileId) {
+                    activeFileId = Object.keys(fileSystem)[0];
+                }
+                contextTargetFileId = null;
+                renderWorkspace();
+            }
+        });
+
+        window.addEventListener('click', () => {
+            customContextMenu.style.display = 'none';
+        });
+
+        // SIMULADOR DE LIVE SERVER GLOBAL INTEGRADO
+        liveServerBtn.addEventListener('click', () => {
+            if(liveWindow && !liveWindow.closed) {
+                liveWindow.close();
+                liveServerBtn.classList.remove('running');
+                liveServerText.innerText = "Go Live";
+                terminalOutput.innerText += "\n📡 [Live Server] Servicio detenido.";
+            } else {
+                liveWindow = window.open('', '_blank');
+                let html = fileSystem['file_1'] ? fileSystem['file_1'].content : '<h1>No index.html</h1>';
+                let css = fileSystem['file_2'] ? fileSystem['file_2'].content : '';
+                
+                let inject = `
+                    <style>${css}</style>
+                    ${html}
+                `;
+                liveWindow.document.write(inject);
+                liveWindow.document.close();
+                
+                liveServerBtn.classList.add('running');
+                liveServerText.innerText = "Port: 5500";
+                terminalOutput.innerText += "\n📡 [Live Server] Desplegado en http://127.0.0.1:5500";
+            }
+        });
+    </script>
+</body>
+</html>
