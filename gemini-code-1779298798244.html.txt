@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Devy - Hyper Pro Code Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Colores Originales VS Code (Azul/Oscuro) */
+            --bg-main: #1e1e1e;
+            --bg-sidebar: #252526;
+            --bg-activity: #333333;
+            --bg-terminal: #1e1e1e;
+            --bg-tabs: #2d2d2d;
+            --bg-tab-active: #1e1e1e;
+            --bg-context: #2b2b2c;
+            --bg-suggest: #252526;
+            
+            --accent: #007acc; 
+            --accent-hover: #1f85de;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #cccccc;
+            --text-muted: #858585;
+            
+            --font-ui: 'Inter', 'Segoe UI', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --font-logo: 'Outfit', sans-serif; /* Nueva tipografía profesional */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 1. BARRA DE ACTIVIDAD */
+        .activity-bar {
+            width: 48px;
+            background-color: var(--bg-activity);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            z-index: 10;
+        }
+
+        .activity-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .activity-btn {
+            position: relative;
+            width: 100%;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.15s ease, background-color 0.15s;
+        }
+
+        .activity-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.02); }
+        .activity-btn.active { color: #ffffff; background-color: rgba(255, 255, 255, 0.05); }
+
+        .activity-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; height: 100%; width: 2px;
+            background-color: var(--accent);
+        }
+
+        /* LOGO DEVY PREMIUM */
+        .brand-logo {
+            font-family: var(--font-logo);
+            font-size: 24px;
+            font-weight: 800;
+            padding: 16px 20px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: -0.5px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+        .brand-logo .colored { color: var(--accent); }
+        .brand-logo .white { color: #ffffff; }
+
+        /* 2. BARRA LATERAL (Sidebar) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 0 12px 0 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 38px;
+        }
+
+        .sidebar-tools { display: flex; gap: 4px; }
+
+        .tool-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .tool-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.05); }
+
+        .sidebar-content { flex: 1; overflow-y: auto; }
+
+        .panel-section { display: none; padding: 10px 0; }
+        .panel-section.active { display: block; animation: panelFade 0.2s ease-in-out; }
+
+        @keyframes panelFade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Árbol de archivos */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px 6px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-main);
+            position: relative;
+            transition: background-color 0.15s;
+        }
+        .tree-item:hover { background-color: rgba(255, 255, 255, 0.03); }
+        .tree-item.active { background-color: rgba(0, 122, 204, 0.12); color: #ffffff; }
+        .tree-item.active::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background-color: var(--accent);
+        }
+
+        .file-info { display: flex; align-items: center; gap: 8px; }
+        .icon-file { color: #e34c26; }
+        .icon-generic { color: #569cd6; }
+
+        .file-options-trigger { opacity: 0; color: var(--text-muted); transition: opacity 0.2s, color 0.2s; }
+        .tree-item:hover .file-options-trigger { opacity: 1; }
+        .file-options-trigger:hover { color: #ffffff; }
+
+        /* Inputs */
+        .search-input-box { padding: 0 20px; margin-bottom: 12px; }
+        .sidebar-input {
+            width: 100%;
+            background: #3c3c3c;
+            border: 1px solid #6b6b6b;
+            color: #ffffff;
+            padding: 6px 8px;
+            font-size: 12px;
+            outline: none;
+        }
+        .sidebar-input:focus { border-color: var(--accent); }
+        .panel-placeholder { padding: 20px; color: var(--text-muted); font-size: 12px; }
+
+        /* ÁREA DEL EDITOR */
+        .main-editor-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--bg-main);
+            position: relative;
+        }
+
+        .tabs-bar {
+            height: 35px;
+            background-color: var(--bg-tabs);
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            height: 100%;
+            background-color: var(--bg-tabs);
+            border-right: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            gap: 8px;
+            position: relative;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        .tab.active { background-color: var(--bg-tab-active); color: #ffffff; }
+        .tab.active::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background-color: var(--accent);
+        }
+
+        .editor-workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            line-height: 1.5;
+            padding: 18px;
+            border: none;
+            resize: none;
+            outline: none;
+            overflow-y: auto;
+            user-select: text;
+        }
+
+        /* 💡 CUADRO DE SUGERENCIAS INTELLISENSE (Estilo VS Code) */
+        .suggest-widget {
+            position: absolute;
+            background-color: var(--bg-suggest);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            width: 280px;
+            max-height: 180px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggest-item {
+            padding: 5px 12px;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .suggest-item:hover, .suggest-item.selected {
+            background-color: var(--accent);
+            color: #ffffff !important;
+        }
+        .suggest-item .tag-label { color: #569cd6; }
+        .suggest-item .type-label { color: var(--text-muted); font-size: 11px; font-family: var(--font-ui); }
+        .suggest-item:hover .type-label, .suggest-item.selected .type-label { color: #e2e2e2; }
+
+        /* MENÚ CONTEXTUAL OPCONES */
+        .context-menu {
+            position: absolute;
+            background-color: var(--bg-context);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 100;
+            width: 130px;
+            display: none;
+            animation: menuScale 0.12s ease-out;
+        }
+        @keyframes menuScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .context-menu-item {
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .context-menu-item:hover { background-color: var(--accent); }
+
+        /* TERMINAL INFERIOR */
+        .bottom-panel {
+            height: 140px;
+            background-color: var(--bg-terminal);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-tabs {
+            height: 30px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-tab { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; }
+        .panel-tab.active { color: #ffffff; position: relative; height: 100%; display: flex; align-items: center; }
+        .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
+        .panel-body { flex: 1; padding: 10px 20px; font-family: var(--font-mono); font-size: 12px; color: #10b981; overflow-y: auto; white-space: pre-line;}
+
+        /* 🔵 BARRA DE ESTADO INFERIOR PREMIUM */
+        .status-bar {
+            height: 24px;
+            background-color: var(--accent);
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 12px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .status-left, .status-right { display: flex; align-items: center; gap: 16px; }
+        .status-item { display: flex; align-items: center; gap: 5px; cursor: pointer; height: 24px; padding: 0 6px; transition: background-color 0.2s; }
+        .status-item:hover { background-color: rgba(255, 255, 255, 0.15); }
+        .status-item.live-btn { background-color: rgba(0, 0, 0, 0.2); padding: 0 12px; font-weight: 500; }
+        .status-item.live-btn.running { background-color: #1f85de; animation: pulseGlow 2s infinite; }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.9; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <aside class="activity-bar">
+            <div class="activity-group">
+                <div class="activity-btn active" data-target="explorer" title="Explorador">
+                    <i data-lucide="files" size="22"></i>
+                </div>
+                <div class="activity-btn" data-target="search" title="Buscar">
+                    <i data-lucide="search" size="22"></i>
+                </div>
+                <div class="activity-btn" data-target="extensions" title="Extensiones">
+                    <i data-lucide="blocks" size="22"></i>
+                </div>
+            </div>
+            <div class="activity-group">
+                <div class="activity-btn" title="Configuración">
+                    <i data-lucide="settings" size="22"></i>
+                </div>
+            </div>
+        </aside>
+
+        <aside class="sidebar">
+            
+            <div class="brand-logo">
+                <span class="colored">De</span><span class="white">vy</span>
+            </div>
+            
+            <div id="panel-explorer" class="panel-section active">
+                <div class="sidebar-header">
+                    <span>EXPLORADOR</span>
+                    <div class="sidebar-tools">
+                        <button class="tool-btn" id="newFileBtn" title="Nuevo Archivo...">
+                            <i data-lucide="file-plus" size="14"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="sidebar-content" id="fileTreeContainer"></div>
+            </div>
+
+            <div id="panel-search" class="panel-section">
+                <div class="sidebar-header"><span>BUSCAR</span></div>
+                <div class="search-input-box">
+                    <input type="text" class="sidebar-input" placeholder="Buscar texto...">
+                </div>
+                <div class="panel-placeholder">Resultados indexados en tiempo real...</div>
+            </div>
+
+            <div id="panel-extensions" class="panel-section">
+                <div class="sidebar-header"><span>MARKETPLACE</span></div>
+                <div class="search-input-box">
+                    <input type="text" class="sidebar-input" placeholder="Buscar extensiones...">
+                </div>
+                <div class="panel-placeholder">Todas las extensiones Pro configuradas.</div>
+            </div>
+        </aside>
+
+        <main class="main-editor-zone">
+            <div class="tabs-bar" id="tabsBar"></div>
+
+            <div class="editor-workspace">
+                <textarea class="code-textarea" id="editor" spellcheck="false" autocomplete="off"></textarea>
+                
+                <div class="suggest-widget" id="suggestWidget"></div>
+            </div>
+
+            <div class="bottom-panel">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">Terminal</div>
+                    <div class="panel-tab">Problemas</div>
+                    <div class="panel-tab">Consola de Depuración</div>
+                </div>
+                <div class="panel-body" id="terminalOutput">
+                    devy@workspace:~$ Entorno Devy Pro inicializado correctamente.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="context-menu" id="customContextMenu">
+        <div class="context-menu-item" id="deleteFileAction">
+            <i data-lucide="trash-2" size="12"></i> Eliminar Archivo
+        </div>
+    </div>
+
+    <footer class="status-bar">
+        <div class="status-left">
+            <div class="status-item" style="background-color: rgba(0,0,0,0.15)">
+                <i data-lucide="terminal" size="12"></i>
+                <span>WS: Activo</span>
+            </div>
+            <div class="status-item">
+                <i data-lucide="git-branch" size="12"></i>
+                <span>main</span>
+            </div>
+            <div class="status-item">
+                <i data-lucide="refresh-cw" size="12"></i>
+            </div>
+            <div class="status-item live-btn" id="liveServerBtn">
+                <i data-lucide="radio" size="12" style="margin-right: 4px;"></i>
+                <span id="liveServerText">Go Live</span>
+            </div>
+        </div>
+        <div class="status-right">
+            <div class="status-item">Fila 1, Col 1</div>
+            <div class="status-item">Espacios: 4</div>
+            <div class="status-item">UTF-8</div>
+            <div class="status-item" id="engineIndicator">HTML Engine</div>
+            <div class="status-item">
+                <i data-lucide="bell" size="12"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sistema de archivos interno interactivo
+        let fileSystem = {
+            'file_1': { name: 'index.html', content: 'Hello World' }
+        };
+        let activeFileId = 'file_1';
+        let contextTargetFileId = null;
+        let liveWindow = null;
+
+        // Base de Datos de Sugerencias Avanzadas (IntelliSense)
+        const suggestionsDictionary = [
+            { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Snippet' },
+            { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag HTML' },
+            { trigger: '<div', replace: '<div>$0</div>', label: '<div>', type: 'Tag HTML' },
+            { trigger: '<span', replace: '<span>$0</span>', label: '<span>', type: 'Tag HTML' },
+            { trigger: '<p', replace: '<p>$0</p>', label: '<p>', type: 'Tag HTML' },
+            { trigger: '<script', replace: '<script>\n\t$0\n<\/script>', label: '<script>', type: 'Script Tag' },
+            { trigger: '<style', replace: '<style>\n\t$0\n<\/style>', label: '<style>', type: 'Style Tag' },
+            { trigger: '<h1', replace: '<h1>$0</h1>', label: '<h1>', type: 'Heading 1' },
+            { trigger: '<h2', replace: '<h2>$0</h2>', label: '<h2>', type: 'Heading 2' },
+            { trigger: '<a', replace: '<a href="$0"></a>', label: '<a>', type: 'Anchor Link' },
+            { trigger: '<img', replace: '<img src="$0" alt="">', label: '<img>', type: 'Image Element' },
+            { trigger: '<ul', replace: '<ul>\n\t<li>$0</li>\n</ul>', label: '<ul>', type: 'List Container' },
+            { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Method' }
+        ];
+
+        let selectedSuggestIndex = 0;
+        let currentFilteredSuggests = [];
+
+        // Elementos DOM
+        const fileTreeContainer = document.getElementById('fileTreeContainer');
+        const tabsBar = document.getElementById('tabsBar');
+        const editor = document.getElementById('editor');
+        const newFileBtn = document.getElementById('newFileBtn');
+        const customContextMenu = document.getElementById('customContextMenu');
+        const deleteFileAction = document.getElementById('deleteFileAction');
+        const liveServerBtn = document.getElementById('liveServerBtn');
+        const liveServerText = document.getElementById('liveServerText');
+        const terminalOutput = document.getElementById('terminalOutput');
+        const engineIndicator = document.getElementById('engineIndicator');
+        const suggestWidget = document.getElementById('suggestWidget');
+
+        // Control Pestañas Sidebar
+        document.querySelectorAll('.activity-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                if (!target) return;
+                document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
+                document.getElementById(`panel-${target}`).classList.add('active');
+            });
+        });
+
+        function renderWorkspace() {
+            renderFileTree();
+            renderTabs();
+            loadActiveFile();
+        }
+
+        function renderFileTree() {
+            fileTreeContainer.innerHTML = '';
+            for (let id in fileSystem) {
+                const file = fileSystem[id];
+                const isHtml = file.name.endsWith('.html');
+                const div = document.createElement('div');
+                div.className = `tree-item ${id === activeFileId ? 'active' : ''}`;
+                div.setAttribute('data-id', id);
+                div.innerHTML = `
+                    <div class="file-info">
+                        <i data-lucide="${isHtml ? 'file-code' : 'file'}" size="14" class="${isHtml ? 'icon-file' : 'icon-generic'}"></i>
+                        <span>${file.name}</span>
+                    </div>
+                    <div class="file-options-trigger" data-id="${id}">
+                        <i data-lucide="more-vertical" size="14"></i>
+                    </div>
+                `;
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.file-options-trigger')) return;
+                    activeFileId = id;
+                    renderWorkspace();
+                });
+                fileTreeContainer.appendChild(div);
+            }
+
+            document.querySelectorAll('.file-options-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    contextTargetFileId = trigger.getAttribute('data-id');
+                    const rect = trigger.getBoundingClientRect();
+                    customContextMenu.style.top = `${rect.bottom + window.scrollY}px`;
+                    customContextMenu.style.left = `${rect.left - 110 + window.scrollX}px`;
+                    customContextMenu.style.display = 'block';
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function renderTabs() {
+            tabsBar.innerHTML = '';
+            if(fileSystem[activeFileId]) {
+                const file = fileSystem[activeFileId];
+                const isHtml = file.name.endsWith('.html');
+                const tab = document.createElement('div');
+                tab.className = 'tab active';
+                tab.innerHTML = `
+                    <i data-lucide="${isHtml ? 'file-code' : 'file'}" size="12" class="${isHtml ? 'icon-file' : 'icon-generic'}"></i>
+                    <span>${file.name}</span>
+                `;
+                tabsBar.appendChild(tab);
+            }
+            lucide.createIcons();
+        }
+
+        function loadActiveFile() {
+            if (fileSystem[activeFileId]) {
+                editor.value = fileSystem[activeFileId].content;
+                editor.disabled = false;
+                engineIndicator.innerText = fileSystem[activeFileId].name.endsWith('.html') ? 'HTML Engine' : 'Plain Text';
+            } else {
+                editor.value = '';
+                editor.disabled = true;
+                engineIndicator.innerText = 'Empty';
+            }
+            closeSuggestions();
+        }
+
+        // Lógica de Autocompletado IntelliSense Integrada
+        editor.addEventListener('input', (e) => {
+            if (!fileSystem[activeFileId]) return;
+            fileSystem[activeFileId].content = editor.value;
+            updateLiveServer();
+
+            const text = editor.value;
+            const cursorPos = editor.selectionStart;
+            
+            // Obtener la palabra actual que se está escribiendo
+            const lastWords = text.substring(0, cursorPos).split(/[\s\n]/);
+            const currentWord = lastWords[lastWords.length - 1].toLowerCase();
+
+            if (currentWord.length >= 2) {
+                currentFilteredSuggests = suggestionsDictionary.filter(item => item.trigger.startsWith(currentWord));
+                if (currentFilteredSuggests.length > 0) {
+                    showSuggestions(currentFilteredSuggests);
+                    return;
+                }
+            }
+            closeSuggestions();
+        });
+
+        // Captura de Teclas Especiales en el Editor (Navegar sugerencias con flechas y aceptar con Tab/Enter)
+        editor.addEventListener('keydown', (e) => {
+            if (suggestWidget.style.display === 'block') {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestIndex = (selectedSuggestIndex + 1) % currentFilteredSuggests.length;
+                    updateSuggestionSelection();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestIndex = (selectedSuggestIndex - 1 + currentFilteredSuggests.length) % currentFilteredSuggests.length;
+                    updateSuggestionSelection();
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    insertSuggestion(currentFilteredSuggests[selectedSuggestIndex]);
+                } else if (e.key === 'Escape') {
+                    closeSuggestions();
+                }
+            }
+        });
+
+        function showSuggestions(list) {
+            suggestWidget.innerHTML = '';
+            selectedSuggestIndex = 0;
+            
+            list.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = `suggest-item ${index === 0 ? 'selected' : ''}`;
+                row.innerHTML = `
+                    <span class="tag-label">${item.label}</span>
+                    <span class="type-label">${item.type}</span>
+                `;
+                row.addEventListener('click', () => insertSuggestion(item));
+                suggestWidget.appendChild(row);
+            });
+
+            // Posicionar de manera adaptativa abajo del cursor de escritura aproximado
+            suggestWidget.style.left = `40px`;
+            suggestWidget.style.top = `100px`;
+            suggestWidget.style.display = 'block';
+        }
+
+        function updateSuggestionSelection() {
+            const rows = suggestWidget.querySelectorAll('.suggest-item');
+            rows.forEach((row, idx) => {
+                if (idx === selectedSuggestIndex) row.classList.add('selected');
+                else row.classList.remove('selected');
+            });
+        }
+
+        function insertSuggestion(item) {
+            const text = editor.value;
+            const cursorPos = editor.selectionStart;
+            const lastLines = text.substring(0, cursorPos).split(/[\s\n]/);
+            const currentWord = lastLines[lastLines.length - 1];
+
+            const startPos = cursorPos - currentWord.length;
+            const cleanSnippet = item.replace.replace('$0', ''); // Limpieza básica de cursores de inserción
+
+            editor.value = text.substring(0, startPos) + cleanSnippet + text.substring(cursorPos);
+            editor.selectionStart = editor.selectionEnd = startPos + cleanSnippet.length;
+            
+            fileSystem[activeFileId].content = editor.value;
+            closeSuggestions();
+            updateLiveServer();
+            editor.focus();
+        }
+
+        function closeSuggestions() {
+            suggestWidget.style.display = 'none';
+        }
+
+        // Crear Nuevos Archivos
+        newFileBtn.addEventListener('click', () => {
+            const fileName = prompt('Nombre del nuevo archivo (ej: index.html, script.js):');
+            if (!fileName) return;
+            const newId = 'file_' + Date.now();
+            fileSystem[newId] = { name: fileName, content: '' };
+            activeFileId = newId;
+            renderWorkspace();
+            terminalOutput.innerText += `\ndevy@workspace:~$ Creado el archivo ${fileName}`;
+        });
+
+        // Eliminar Archivos
+        deleteFileAction.addEventListener('click', () => {
+            if (!contextTargetFileId) return;
+            const name = fileSystem[contextTargetFileId].name;
+            delete fileSystem[contextTargetFileId];
+            if (activeFileId === contextTargetFileId) {
+                const remaining = Object.keys(fileSystem);
+                activeFileId = remaining.length > 0 ? remaining[0] : null;
+            }
+            customContextMenu.style.display = 'none';
+            renderWorkspace();
+            terminalOutput.innerText += `\ndevy@workspace:~$ Eliminado el archivo ${name}`;
+        });
+
+        document.addEventListener('click', () => { customContextMenu.style.display = 'none'; });
+
+        // Servidor en Vivo Remoto
+        liveServerBtn.addEventListener('click', () => {
+            if (!activeFileId || !fileSystem[activeFileId]) return;
+            if (!liveWindow || liveWindow.closed) {
+                liveWindow = window.open('', '_blank');
+                if (liveWindow) {
+                    liveServerBtn.classList.add('running');
+                    liveServerText.innerText = "Port: 5500";
+                    terminalOutput.innerText += "\n📡 [Live Server] Escuchando cambios en tiempo real en puerto 5500.";
+                } else {
+                    alert("Permite ventanas emergentes.");
+                    return;
+                }
+            }
+            updateLiveServer();
+            liveWindow.focus();
+        });
+
+        function updateLiveServer() {
+            if (liveWindow && !liveWindow.closed && fileSystem[activeFileId]) {
+                clearTimeout(window.liveTimeout);
+                window.liveTimeout = setTimeout(() => {
+                    liveWindow.document.open();
+                    liveWindow.document.write(fileSystem[activeFileId].content);
+                    liveWindow.document.close();
+                }, 300);
+            }
+        }
+
+        setInterval(() => {
+            if (liveWindow && liveWindow.closed) {
+                liveWindow = null;
+                liveServerBtn.classList.remove('running');
+                liveServerText.innerText = "Go Live";
+                terminalOutput.innerText += "\n❌ [Live Server] Sesión terminada.";
+            }
+        }, 1000);
+
+        window.addEventListener('DOMContentLoaded', () => { renderWorkspace(); });
+    </script>
+</body>
+</html>
