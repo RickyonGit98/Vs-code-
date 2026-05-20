@@ -67,7 +67,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: 6px; /* Efecto ventana flotante estética */
+            padding: 6px;
         }
 
         /* Contenedor Principal Redondeado */
@@ -81,6 +81,54 @@
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
             border: 1px solid var(--border-color);
             position: relative;
+        }
+
+        /* 🆕 NUEVA BARRA SUPERIOR GRIS ESTÉTICA */
+        .top-status-bar {
+            height: 38px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        .top-left, .top-right { display: flex; align-items: center; gap: 12px; }
+        
+        .top-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        /* Botón Live Server Estilo Gris Conjunto */
+        .top-item.live-btn { 
+            background-color: rgba(255, 255, 255, 0.04); 
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .top-item.live-btn:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+        .top-item.live-btn.running { 
+            background-color: rgba(34, 197, 94, 0.15); 
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, 0.3);
+            animation: pulseGlow 2s infinite; 
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; }
         }
 
         .app-container {
@@ -149,9 +197,9 @@
         /* LOGO DEVY PREMIUM */
         .brand-logo {
             font-family: var(--font-logo);
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            padding: 14px 20px;
+            padding: 10px 16px;
             background-color: var(--bg-sidebar);
             border-bottom: 1px solid var(--border-color);
             letter-spacing: -0.5px;
@@ -164,7 +212,7 @@
 
         /* 2. BARRA LATERAL (Sidebar) */
         .sidebar {
-            width: 280px;
+            width: 260px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -183,14 +231,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 40px;
+            height: 36px;
         }
 
         .sidebar-tools { display: flex; gap: 6px; }
 
         .tool-btn {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -206,7 +254,7 @@
         .sidebar-content { 
             flex: 1; 
             overflow-y: auto; 
-            padding: 8px 0;
+            padding: 6px 0;
         }
 
         .panel-section { display: none; height: 100%; flex-direction: column; }
@@ -222,11 +270,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 16px;
+            padding: 6px 12px;
             cursor: pointer;
             font-size: 13px;
             color: var(--text-main);
-            margin: 2px 8px;
+            margin: 2px 6px;
             border-radius: var(--radius-sm);
             transition: all 0.15s;
         }
@@ -247,58 +295,49 @@
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: 12px;
-            margin: 8px 12px;
+            padding: 10px;
+            margin: 6px 10px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: start;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-        .extension-card:hover {
-            background: rgba(255, 255, 255, 0.04);
-            transform: translateY(-1px);
         }
         .ext-icon {
-            padding: 6px;
+            padding: 4px;
             background: rgba(0, 122, 204, 0.1);
             border-radius: var(--radius-sm);
             color: var(--accent);
         }
         .ext-info { flex: 1; }
-        .ext-title { font-size: 13px; font-weight: 600; color: #ffffff; }
+        .ext-title { font-size: 12px; font-weight: 600; color: #ffffff; }
         .ext-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
         .ext-btn {
-            margin-top: 8px;
-            padding: 4px 10px;
-            font-size: 11px;
+            margin-top: 6px;
+            padding: 4px 8px;
+            font-size: 10px;
             font-weight: 500;
             border: none;
             border-radius: var(--radius-sm);
             cursor: pointer;
             background: var(--accent);
             color: white;
-            transition: background 0.2s;
         }
         .ext-btn.installed {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-main);
         }
 
-        /* Inputs Modernos */
-        .search-input-box { padding: 8px 12px; }
+        .search-input-box { padding: 6px 10px; }
         .sidebar-input {
             width: 100%;
             background: #2d2d30;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
             color: #ffffff;
-            padding: 8px 10px;
+            padding: 6px 8px;
             font-size: 12px;
             outline: none;
-            transition: border-color 0.2s;
         }
-        .sidebar-input:focus { border-color: var(--accent); }
-        .panel-placeholder { padding: 16px; color: var(--text-muted); font-size: 12px; text-align: center; }
+        .panel-placeholder { padding: 12px; color: var(--text-muted); font-size: 12px; text-align: center; }
 
         /* ÁREA DEL EDITOR */
         .main-editor-zone {
@@ -311,7 +350,7 @@
         }
 
         .tabs-bar {
-            height: 40px;
+            height: 36px;
             background-color: var(--bg-tabs);
             display: flex;
             overflow-x: auto;
@@ -323,24 +362,22 @@
         .tab {
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            height: 34px;
+            padding: 0 14px;
+            height: 30px;
             background-color: rgba(0, 0, 0, 0.15);
             border-radius: var(--radius-md) var(--radius-md) 0 0;
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             gap: 8px;
             margin-right: 4px;
             border: 1px solid transparent;
             border-bottom: none;
-            transition: all 0.2s;
         }
         .tab.active { 
             background-color: var(--bg-tab-active); 
             color: #ffffff;
             border-color: var(--border-color);
-            font-weight: 500;
         }
 
         .editor-workspace {
@@ -350,54 +387,35 @@
             position: relative;
         }
 
-        /* Nuevo Contenedor de Monaco Engine */
         #editor-container {
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
 
-        /* 💡 INTELLISENSE REDONDEADO Y PREMIUM (Mantenido por compatibilidad visual) */
-        .suggest-widget {
-            position: absolute;
-            background-color: var(--bg-suggest);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-md);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            width: 320px;
-            max-height: 220px;
-            overflow-y: auto;
-            display: none;
-            animation: suggestPop 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-        }
-
-        @keyframes suggestPop {
-            from { transform: translateY(5px) scale(0.97); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        .suggest-item {
-            padding: 8px 12px;
-            font-size: 13px;
-            font-family: var(--font-mono);
-            cursor: pointer;
+        /* TERMINAL INFERIOR OPTIMIZADA */
+        .bottom-panel {
+            height: 130px; /* Reducida ligeramente para dar aire vertical al espacio */
+            background-color: var(--bg-terminal);
+            border-top: 1px solid var(--border-color);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.1s;
+            flex-direction: column;
         }
-        .suggest-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
-        .suggest-item:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
 
-        .suggest-item:hover, .suggest-item.selected {
-            background-color: var(--accent);
-            color: #ffffff !important;
+        .panel-tabs {
+            height: 30px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
-        .suggest-item .tag-label { color: #4fc1ff; }
-        .suggest-item.selected .tag-label { color: white; }
-        .suggest-item .type-label { color: var(--text-muted); font-size: 11px; font-family: var(--font-ui); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+
+        .panel-tab { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .panel-tab.active { color: #ffffff; position: relative; height: 100%; display: flex; align-items: center; }
+        .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
+        .panel-body { flex: 1; padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; color: #34d399; overflow-y: auto; white-space: pre-line;}
 
         /* MENÚ CONTEXTUAL */
         .context-menu {
@@ -410,9 +428,7 @@
             width: 165px;
             display: none;
             padding: 4px;
-            animation: menuScale 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes menuScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
         .context-menu-item {
             padding: 8px 12px;
@@ -425,58 +441,33 @@
             border-radius: var(--radius-sm);
         }
         .context-menu-item:hover { background-color: var(--accent); }
-
-        /* TERMINAL INFERIOR REDONDEADA */
-        .bottom-panel {
-            height: 160px;
-            background-color: var(--bg-terminal);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-tabs {
-            height: 34px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            gap: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .panel-tab { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; }
-        .panel-tab.active { color: #ffffff; position: relative; height: 100%; display: flex; align-items: center; }
-        .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
-        .panel-body { flex: 1; padding: 12px 16px; font-family: var(--font-mono); font-size: 12px; color: #34d399; overflow-y: auto; white-space: pre-line;}
-
-        /* 🔵 BARRA DE ESTADO INFERIOR SIEMPRE VISIBLE */
-        .status-bar {
-            height: 26px;
-            background-color: var(--accent);
-            color: #ffffff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 12px;
-            font-size: 11px;
-            z-index: 100;
-        }
-
-        .status-left, .status-right { display: flex; align-items: center; gap: 14px; }
-        .status-item { display: flex; align-items: center; gap: 6px; cursor: pointer; height: 26px; padding: 0 8px; transition: background-color 0.2s; }
-        .status-item:hover { background-color: rgba(255, 255, 255, 0.15); }
-        .status-item.live-btn { background-color: rgba(0, 0, 0, 0.2); font-weight: 600; }
-        .status-item.live-btn.running { background-color: #22c55e; animation: pulseGlow 2s infinite; }
-
-        @keyframes pulseGlow {
-            0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.9; }
-        }
     </style>
 </head>
 <body>
 
     <div class="window-frame">
+        
+        <header class="top-status-bar">
+            <div class="top-left">
+                <div class="top-item" style="color: #ffffff; font-weight: 600;">
+                    <i data-lucide="terminal" size="13"></i>
+                    <span>Pro Environment</span>
+                </div>
+                <div class="top-item">
+                    <i data-lucide="git-branch" size="13"></i>
+                    <span>main</span>
+                </div>
+            </div>
+            <div class="top-right">
+                <div class="top-item id-engine" id="engineIndicator">HTML Engine</div>
+                <div class="top-item" id="extIndicator">Ext: 0 Activas</div>
+                <div class="top-item live-btn" id="liveServerBtn">
+                    <i data-lucide="radio" size="13"></i>
+                    <span id="liveServerText">Go Live</span>
+                </div>
+            </div>
+        </header>
+
         <div class="app-container">
             
             <aside class="activity-bar">
@@ -528,8 +519,7 @@
                     <div class="search-input-box">
                         <input type="text" class="sidebar-input" id="extSearch" placeholder="Buscar extensiones...">
                     </div>
-                    <div class="sidebar-content" id="extensionsContainer">
-                        </div>
+                    <div class="sidebar-content" id="extensionsContainer"></div>
                 </div>
             </aside>
 
@@ -538,8 +528,6 @@
 
                 <div class="editor-workspace">
                     <div id="editor-container"></div>
-                    
-                    <div class="suggest-widget" id="suggestWidget"></div>
                 </div>
 
                 <div class="bottom-panel">
@@ -549,34 +537,11 @@
                         <div class="panel-tab">Output</div>
                     </div>
                     <div class="panel-body" id="terminalOutput">
-                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima.
+                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima con Monaco Engine.
                     </div>
                 </div>
             </main>
         </div>
-
-        <footer class="status-bar">
-            <div class="status-left">
-                <div class="status-item" style="background-color: rgba(0,0,0,0.15)">
-                    <i data-lucide="terminal" size="12"></i>
-                    <span>Pro Environment</span>
-                </div>
-                <div class="status-item">
-                    <i data-lucide="git-branch" size="12"></i>
-                    <span>main</span>
-                </div>
-                <div class="status-item live-btn" id="liveServerBtn">
-                    <i data-lucide="radio" size="12"></i>
-                    <span id="liveServerText">Go Live</span>
-                </div>
-            </div>
-            <div class="status-right">
-                <div class="status-item" id="extIndicator">Ext: 0 Activas</div>
-                <div class="status-item">UTF-8</div>
-                <div class="status-item" id="engineIndicator">HTML Engine</div>
-                <div class="status-item"><i data-lucide="bell" size="12"></i></div>
-            </div>
-        </footer>
     </div>
 
     <div class="context-menu" id="customContextMenu">
@@ -596,9 +561,9 @@
         let activeFileId = 'file_1';
         let contextTargetFileId = null;
         let liveWindow = null;
-        let monacoEditorInstance = null; // Instancia global de Mónaco
+        let monacoEditorInstance = null;
 
-        // Base de Datos de Extensiones Reales e Instalables
+        // Base de Datos de Extensiones
         let extensionsData = [
             { id: 'prettier', name: 'Prettier Formatter', desc: 'Formatea automáticamente tu código al guardar o escribir.', installed: false, type: 'formatter' },
             { id: 'brackets', name: 'Bracket Pair Colorizer', desc: 'Colorea corchetes y llaves para no perderte.', installed: false, type: 'ui' },
@@ -606,28 +571,21 @@
             { id: 'autoprefixer', name: 'CSS Auto-Prefixer', desc: 'Añade sugerencias avanzadas de Webkit/Moz a tu CSS.', installed: false, type: 'suggest' }
         ];
 
-        // Diccionario Avanzado de Sugerencias IntelliSense Mejorado
         const suggestionsDictionary = [
-            // HTML structural
             { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t$0\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Estructura' },
             { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag Base' },
             { trigger: '<div', replace: '<div class="$0"></div>', label: '<div> con clase', type: 'Contenedor' },
             { trigger: '<section', replace: '<section id="$0">\n\t\n</section>', label: '<section>', type: 'Semántico' },
             { trigger: '<script', replace: '<script src="$0"><\/script>', label: '<script src="">', type: 'Enlace Script' },
             { trigger: '<link', replace: '<link rel="stylesheet" href="$0">', label: '<link css>', type: 'Enlace CSS' },
-            // JS Suggestions
             { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Output' },
             { trigger: 'addEventListener', replace: 'addEventListener(\'$0\', (e) => {\n\t\n});', label: 'addEventListener', type: 'JS Evento' },
             { trigger: 'fetch', replace: 'fetch(\'$0\')\n\t.then(res => res.json())\n\t.then(data => console.log(data));', label: 'fetch() API', type: 'JS Async' },
             { trigger: 'function', replace: 'function $0() {\n\t\n}', label: 'function standard', type: 'JS Estructura' },
-            // CSS Suggestions (Disponibles por defecto o expandidas por extensión)
             { trigger: 'display: flex', replace: 'display: flex;\njustify-content: center;\nalign-items: center;$0', label: 'flex-center', type: 'CSS Layout' },
             { trigger: 'box-shadow', replace: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);$0', label: 'box-shadow premium', type: 'CSS Efecto' },
             { trigger: 'background-image', replace: 'background: linear-gradient(135deg, #007acc, #1f85de);$0', label: 'gradient-blue', type: 'CSS Diseño' }
         ];
-
-        let selectedSuggestIndex = 0;
-        let currentFilteredSuggests = [];
 
         // Elementos DOM
         const fileTreeContainer = document.getElementById('fileTreeContainer');
@@ -639,11 +597,10 @@
         const liveServerText = document.getElementById('liveServerText');
         const terminalOutput = document.getElementById('terminalOutput');
         const engineIndicator = document.getElementById('engineIndicator');
-        const suggestWidget = document.getElementById('suggestWidget');
         const extensionsContainer = document.getElementById('extensionsContainer');
         const extIndicator = document.getElementById('extIndicator');
 
-        // Control de Pestañas Sidebar (Cambio de vistas con animaciones suaves)
+        // Control de Pestañas Sidebar
         document.querySelectorAll('.activity-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const target = btn.getAttribute('data-target');
@@ -655,53 +612,48 @@
             });
         });
 
-        // INICIALIZACIÓN CONFIGURACIÓN DE MONACO
+        // INICIALIZACIÓN MONACO
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
         
         require(['vs/editor/editor.main'], function() {
-            // Mapeamos tus snippets personalizados de JavaScript/HTML/CSS dentro del autocompletado inteligente de Monaco
             monaco.languages.registerCompletionItemProvider('javascript', {
-                provideCompletionItems: () => {
-                    return { suggestions: suggestionsDictionary.map(s => ({
+                provideCompletionItems: () => ({
+                    suggestions: suggestionsDictionary.map(s => ({
                         label: s.label,
                         kind: monaco.languages.CompletionItemKind.Snippet,
                         documentation: s.type,
                         insertText: s.replace.replace('$0', ''),
                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                    }))};
-                }
+                    }))
+                })
             });
             monaco.languages.registerCompletionItemProvider('html', {
-                provideCompletionItems: () => {
-                    return { suggestions: suggestionsDictionary.map(s => ({
+                provideCompletionItems: () => ({
+                    suggestions: suggestionsDictionary.map(s => ({
                         label: s.label,
                         kind: monaco.languages.CompletionItemKind.Snippet,
                         documentation: s.type,
                         insertText: s.replace.replace('$0', ''),
                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                    }))};
-                }
+                    }))
+                })
             });
 
-            // Creamos el workspace de Monaco en el contenedor vacío
             monacoEditorInstance = monaco.editor.create(document.getElementById('editor-container'), {
                 theme: 'vs-dark',
                 fontSize: 14,
                 fontFamily: 'var(--font-mono)',
                 automaticLayout: true,
                 suggestOnTriggerCharacters: true,
-                quickSuggestions: { other: true, comments: false, strings: false },
                 minimap: { enabled: true }
             });
 
-            // Sincronización continua de cambios al objeto fileSystem
             monacoEditorInstance.onDidChangeModelContent(() => {
                 if (fileSystem[activeFileId]) {
                     fileSystem[activeFileId].content = monacoEditorInstance.getValue();
                 }
             });
 
-            // Arrancamos el renderizado original
             renderWorkspace();
         });
 
@@ -761,11 +713,10 @@
         function renderTabs() {
             tabsBar.innerHTML = '';
             for (let id in fileSystem) {
-                const file = fileSystem[id];
                 if(id === activeFileId) {
                     const tab = document.createElement('div');
                     tab.className = 'tab active';
-                    tab.innerHTML = `<span>${file.name}</span>`;
+                    tab.innerHTML = `<span>${fileSystem[id].name}</span>`;
                     tabsBar.appendChild(tab);
                 }
             }
@@ -784,8 +735,6 @@
             if (fileSystem[activeFileId]) {
                 const file = fileSystem[activeFileId];
                 const currentLang = getLangType(file.name);
-                
-                // Mónaco asigna inteligentemente la sintaxis cambiando el modelo en vivo
                 const model = monaco.editor.createModel(file.content, currentLang);
                 monacoEditorInstance.setModel(model);
 
@@ -796,10 +745,8 @@
                 monacoEditorInstance.setValue('');
                 engineIndicator.innerText = 'Null';
             }
-            closeSuggestions();
         }
 
-        // Renderizado del Marketplace de Extensiones
         function renderExtensions() {
             extensionsContainer.innerHTML = '';
             let activeCount = 0;
@@ -809,7 +756,7 @@
                 const card = document.createElement('div');
                 card.className = 'extension-card';
                 card.innerHTML = `
-                    <div class="ext-icon"><i data-lucide="puzzle" size="18"></i></div>
+                    <div class="ext-icon"><i data-lucide="puzzle" size="16"></i></div>
                     <div class="ext-info">
                         <div class="ext-title">${ext.name}</div>
                         <div class="ext-desc">${ext.desc}</div>
@@ -824,11 +771,10 @@
             extIndicator.innerText = `Ext: ${activeCount} Activas`;
 
             document.querySelectorAll('.ext-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-id');
                     const ext = extensionsData.find(e => e.id === id);
                     ext.installed = !ext.installed;
-                    
                     if (ext.installed) {
                         terminalOutput.innerText += `\n📦 [Extensiones] "${ext.name}" activada con éxito.`;
                     }
@@ -838,12 +784,6 @@
             lucide.createIcons();
         }
 
-        // Funciones heredadas de tu antiguo autocompletado (Mantenidas por seguridad y estabilidad estructural)
-        function closeSuggestions() {
-            suggestWidget.style.display = 'none';
-        }
-
-        // Crear Nuevo Archivo
         newFileBtn.addEventListener('click', () => {
             const name = prompt('Nombre del archivo:');
             if(name) {
@@ -854,7 +794,6 @@
             }
         });
 
-        // Menú contextual acciones
         deleteFileAction.addEventListener('click', () => {
             if(contextTargetFileId && Object.keys(fileSystem).length > 1) {
                 delete fileSystem[contextTargetFileId];
@@ -866,11 +805,9 @@
             }
         });
 
-        window.addEventListener('click', () => {
-            customContextMenu.style.display = 'none';
-        });
+        window.addEventListener('click', () => { customContextMenu.style.display = 'none'; });
 
-        // SIMULADOR DE LIVE SERVER GLOBAL INTEGRADO
+        // LIVE SERVER DESDE LA PARTE SUPERIOR
         liveServerBtn.addEventListener('click', () => {
             if(liveWindow && !liveWindow.closed) {
                 liveWindow.close();
@@ -881,11 +818,7 @@
                 liveWindow = window.open('', '_blank');
                 let html = fileSystem['file_1'] ? fileSystem['file_1'].content : '<h1>No index.html</h1>';
                 let css = fileSystem['file_2'] ? fileSystem['file_2'].content : '';
-                
-                let inject = `
-                    <style>${css}</style>
-                    ${html}
-                `;
+                let inject = `<style>${css}</style>${html}`;
                 liveWindow.document.write(inject);
                 liveWindow.document.close();
                 
