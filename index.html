@@ -3,830 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Devy Pro - Web Coding</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Visual Studio Code</title>
+    <link rel="icon" type="image/x-icon" href="https://code.visualstudio.com/favicon.ico">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons@0.0.36/dist/codicon.css">
+
     <style>
-        :root {
-            /* Paleta VS Code Pro redondeada */
-            --bg-main: #1c1c1e;
-            --bg-sidebar: #242426;
-            --bg-activity: #2c2c2e;
-            --bg-terminal: #171718;
-            --bg-tabs: #2a2a2c;
-            --bg-tab-active: #1c1c1e;
-            --bg-context: #2d2d30;
-            --bg-suggest: rgba(43, 43, 44, 0.95);
-            
-            --accent: #007acc; 
-            --accent-hover: #1f85de;
-            --border-color: rgba(255, 255, 255, 0.06);
-            --text-main: #d4d4d4;
-            --text-muted: #8e8e93;
-            --radius-lg: 12px;
-            --radius-md: 8px;
-            --radius-sm: 4px;
-            
-            --font-ui: 'Inter', sans-serif;
-            --font-mono: 'Fira Code', monospace;
-            --font-logo: 'Outfit', sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Scrollbars Estilo VS Code */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-sm);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         body {
-            font-family: var(--font-ui);
-            background-color: #121212;
-            color: var(--text-main);
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding: 6px;
+            margin: 0; padding: 0;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #1f1f1f; color: #cccccc;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            user-select: none; -webkit-font-smoothing: antialiased;
         }
 
-        /* Contenedor Principal Redondeado */
-        .window-frame {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            background-color: var(--bg-main);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--border-color);
-            position: relative;
+        /* --- BARRA SUPERIOR (NAV DE RUTA REAL) --- */
+        .title-bar {
+            height: 45px; background-color: #1f1f1f; display: flex; align-items: center;
+            justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #2b2b2b; font-size: 13px;
         }
+        .title-left { display: flex; align-items: center; gap: 12px; }
+        .title-left img { width: 26px; height: 26px; object-fit: contain; }
+        .nav-controls { display: flex; gap: 4px; color: #858585; margin-left: 10px; font-size: 16px;}
+        .nav-controls i { padding: 4px; cursor: pointer; border-radius: 4px; }
+        .nav-controls i:hover { color: #fff; background-color: #2d2d2d; }
+        .title-center {
+            color: #cccccc; flex-grow: 1; text-align: center; max-width: 600px;
+            background-color: #2c2c2c; padding: 6px 16px; border-radius: 6px;
+            border: 1px solid #3c3c3c; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .title-right { display: flex; gap: 12px; color: #858585; font-size: 16px; width: 120px; justify-content: flex-end; }
+        .title-right i { cursor: pointer; padding: 4px; }
+        .title-right i:hover { color: #fff; }
 
-        /* 🆕 NUEVA BARRA SUPERIOR GRIS ESTÉTICA */
-        .top-status-bar {
-            height: 38px;
-            background-color: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 16px;
-            font-size: 12px;
-            z-index: 100;
-        }
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-        .top-left, .top-right { display: flex; align-items: center; gap: 12px; }
-        
-        .top-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            color: var(--text-muted);
-            padding: 4px 8px;
-            border-radius: var(--radius-sm);
-            transition: background-color 0.2s, color 0.2s;
-        }
-        
-        /* Botón Live Server Estilo Gris Conjunto */
-        .top-item.live-btn { 
-            background-color: rgba(255, 255, 255, 0.04); 
-            color: var(--text-main);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .top-item.live-btn:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-        }
-        .top-item.live-btn.running { 
-            background-color: rgba(34, 197, 94, 0.15); 
-            color: #22c55e;
-            border-color: rgba(34, 197, 94, 0.3);
-            animation: pulseGlow 2s infinite; 
-        }
-
-        @keyframes pulseGlow {
-            0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; }
-        }
-
-        .app-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* 1. BARRA DE ACTIVIDAD (Izquierda) */
+        /* --- BARRA LATERAL IZQUIERDA (ICONOS ENORMES A 32PX) --- */
         .activity-bar {
-            width: 56px;
-            background-color: var(--bg-activity);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            z-index: 10;
+            width: 64px; background-color: #181818; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center; padding: 10px 0; border-right: 1px solid #2b2b2b; z-index: 3;
+        }
+        .activity-top, .activity-bottom { display: flex; flex-direction: column; width: 100%; align-items: center; gap: 4px; }
+        .act-icon {
+            font-size: 32px; color: #858585; cursor: pointer; width: 100%; height: 60px;
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .act-icon:hover { color: #e1e1e1; }
+        .act-icon.active { color: #ffffff; background-color: #1f1f1f; }
+        .act-icon.active::before {
+            content: ""; position: absolute; left: 0; top: 15%; height: 70%; width: 3px; background-color: #007acc;
         }
 
-        .activity-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .activity-btn {
-            position: relative;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: var(--radius-md);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .activity-btn:hover { 
-            color: #ffffff; 
-            background-color: rgba(255, 255, 255, 0.05);
-            transform: scale(1.04);
-        }
+        /* --- CONTENEDOR EXPLORADOR --- */
+        .sidebar { width: 300px; background-color: #181818; border-right: 1px solid #2b2b2b; display: flex; flex-direction: column; }
+        .panel-content { display: none; height: 100%; flex-direction: column; }
+        .panel-content.active { display: flex; }
+        .sidebar-header { padding: 10px 16px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #bbbbbb; display: flex; justify-content: space-between; align-items: center; }
         
-        .activity-btn.active { 
-            color: #ffffff; 
-            background-color: rgba(0, 122, 204, 0.15); 
+        /* Acciones de la cabecera en gris pequeño tal cual el real */
+        .sidebar-section-title {
+            background-color: #1f1f1f; padding: 6px 16px; font-size: 11px; font-weight: bold;
+            text-transform: uppercase; color: #bbbbbb; display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid #2b2b2b; border-bottom: 1px solid #2b2b2b;
         }
+        .section-actions-grey { display: flex; gap: 8px; color: #858585; font-size: 14px; }
+        .section-actions-grey i { cursor: pointer; padding: 2px; border-radius: 3px; }
+        .section-actions-grey i:hover { color: #fff; background-color: #333333; }
 
-        .activity-btn::after {
-            content: '';
-            position: absolute;
-            left: -4px; top: 25%; height: 50%; width: 3px;
-            background-color: var(--accent);
-            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .activity-btn.active::after { opacity: 1; }
-
-        /* LOGO DEVY PREMIUM */
-        .brand-logo {
-            font-family: var(--font-logo);
-            font-size: 20px;
-            font-weight: 800;
-            padding: 10px 16px;
-            background-color: var(--bg-sidebar);
-            border-bottom: 1px solid var(--border-color);
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .brand-logo .colored { color: var(--accent); }
-        .brand-logo .white { color: #ffffff; }
-
-        /* 2. BARRA LATERAL (Sidebar) */
-        .sidebar {
-            width: 260px;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .sidebar-header {
-            padding: 0 16px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 36px;
-        }
-
-        .sidebar-tools { display: flex; gap: 6px; }
-
-        .tool-btn {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s;
-        }
-        .tool-btn:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.08); }
-
-        .sidebar-content { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 6px 0;
-        }
-
-        .panel-section { display: none; height: 100%; flex-direction: column; }
-        .panel-section.active { display: flex; animation: panelFade 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        @keyframes panelFade { 
-            from { opacity: 0; transform: translateX(-6px); } 
-            to { opacity: 1; transform: translateX(0); } 
-        }
-
-        /* Árbol de archivos */
-        .tree-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 13px;
-            color: var(--text-main);
-            margin: 2px 6px;
-            border-radius: var(--radius-sm);
-            transition: all 0.15s;
-        }
-        .tree-item:hover { background-color: rgba(255, 255, 255, 0.04); }
-        .tree-item.active { background-color: rgba(0, 122, 204, 0.14); color: #ffffff; }
-
-        .file-info { display: flex; align-items: center; gap: 10px; }
-        .icon-file { color: #e34c26; }
-        .icon-js { color: #f7df1e; }
-        .icon-css { color: #264de4; }
-        .icon-generic { color: var(--accent); }
-
-        .file-options-trigger { opacity: 0; color: var(--text-muted); transition: opacity 0.2s; }
-        .tree-item:hover .file-options-trigger { opacity: 1; }
-
-        /* Contenedor de Extensiones */
-        .extension-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 10px;
-            margin: 6px 10px;
-            display: flex;
-            gap: 10px;
-            align-items: start;
-        }
-        .ext-icon {
-            padding: 4px;
-            background: rgba(0, 122, 204, 0.1);
-            border-radius: var(--radius-sm);
-            color: var(--accent);
-        }
-        .ext-info { flex: 1; }
-        .ext-title { font-size: 12px; font-weight: 600; color: #ffffff; }
-        .ext-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
-        .ext-btn {
-            margin-top: 6px;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: 500;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            background: var(--accent);
-            color: white;
-        }
-        .ext-btn.installed {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-        }
-
-        .search-input-box { padding: 6px 10px; }
-        .sidebar-input {
-            width: 100%;
-            background: #2d2d30;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            color: #ffffff;
-            padding: 6px 8px;
-            font-size: 12px;
-            outline: none;
-        }
-        .panel-placeholder { padding: 12px; color: var(--text-muted); font-size: 12px; text-align: center; }
-
-        /* ÁREA DEL EDITOR */
-        .main-editor-zone {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background-color: var(--bg-main);
-            position: relative;
-        }
-
-        .tabs-bar {
-            height: 36px;
-            background-color: var(--bg-tabs);
-            display: flex;
-            overflow-x: auto;
-            align-items: flex-end;
-            padding-left: 6px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .tab {
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            height: 30px;
-            background-color: rgba(0, 0, 0, 0.15);
-            border-radius: var(--radius-md) var(--radius-md) 0 0;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            gap: 8px;
-            margin-right: 4px;
-            border: 1px solid transparent;
-            border-bottom: none;
-        }
-        .tab.active { 
-            background-color: var(--bg-tab-active); 
-            color: #ffffff;
-            border-color: var(--border-color);
-        }
-
-        .editor-workspace {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #editor-container {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* TERMINAL INFERIOR OPTIMIZADA */
-        .bottom-panel {
-            height: 130px; /* Reducida ligeramente para dar aire vertical al espacio */
-            background-color: var(--bg-terminal);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-tabs {
-            height: 30px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            gap: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .panel-tab { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-        .panel-tab.active { color: #ffffff; position: relative; height: 100%; display: flex; align-items: center; }
-        .panel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background-color: var(--accent); }
-        .panel-body { flex: 1; padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; color: #34d399; overflow-y: auto; white-space: pre-line;}
-
-        /* MENÚ CONTEXTUAL */
-        .context-menu {
-            position: absolute;
-            background-color: var(--bg-context);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-md);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 100;
-            width: 165px;
-            display: none;
-            padding: 4px;
-        }
+        /* Botones laterales cuando el workspace está vacío */
+        .empty-explorer-container { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .empty-explorer-text { font-size: 13px; color: #8c8c8c; line-height: 18px; margin-bottom: 5px; }
         
-        .context-menu-item {
-            padding: 8px 12px;
-            font-size: 12px;
-            color: #ffffff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: var(--radius-sm);
+        /* Estilos de botones de llamada a la acción en la barra lateral */
+        .btn-sidebar-action {
+            background-color: #007acc; color: #ffffff; border: none;
+            padding: 8px 12px; font-size: 13px; border-radius: 2px; text-align: center;
+            cursor: pointer; font-weight: 500;
         }
-        .context-menu-item:hover { background-color: var(--accent); }
+        .btn-sidebar-action:hover { background-color: #0062a3; }
+        .btn-sidebar-secondary {
+            background-color: #2c2c2c; color: #cccccc; border: 1px solid #3c3c3c;
+            padding: 8px 12px; font-size: 13px; border-radius: 2px; text-align: center;
+            cursor: pointer; margin-top: 2px;
+        }
+        .btn-sidebar-secondary:hover { background-color: #3c3c3c; color: #fff; }
+
+        /* Árbol del explorador activo */
+        .file-tree { padding: 4px 0; overflow-y: auto; display: none; }
+        .file-item { display: flex; align-items: center; padding: 6px 16px; font-size: 14px; cursor: pointer; color: #cccccc; gap: 10px; }
+        .file-item:hover { background-color: #2a2d2e; }
+        .file-item.active { background-color: #37373d; color: #ffffff; }
+        
+        /* COLOR DE ICONOS EXCLUSIVOS REALES (Última versión) */
+        .icon-js { color: #f1e05a; font-weight: bold; font-style: normal; font-size: 13px; }
+        .icon-html { color: #e34c26; font-size: 14px; }
+        .icon-css { color: #569cd6; font-size: 14px; }
+        .icon-json { color: #cbdc43; font-size: 14px; }
+
+        /* --- PANELES DE EDICIÓN --- */
+        .editor-area { flex: 1; background-color: #1f1f1f; display: flex; flex-direction: column; position: relative; }
+        .tabs-container { height: 40px; background-color: #181818; display: flex; overflow-x: auto; border-bottom: 1px solid #2b2b2b;}
+        .tab { display: flex; align-items: center; padding: 0 16px; background-color: #181818; color: #8c8c8c; border-right: 1px solid #252526; font-size: 13px; cursor: pointer; gap: 10px; height: 100%; box-sizing: border-box; }
+        .tab.active { background-color: #1f1f1f; color: #ffffff; border-top: 2px solid #007acc; }
+        .tab .close-icon { font-size: 12px; border-radius: 3px; padding: 2px; }
+        .tab .close-icon:hover { background-color: #333333; color: #ffffff; }
+
+        /* --- PANTALLA WELCOME COMPLETA ORIGINAL --- */
+        .welcome-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #1f1f1f; z-index: 5; display: flex; padding: 50px; gap: 60px; overflow-y: auto; }
+        .welcome-left { flex: 1.2; display: flex; flex-direction: column; gap: 24px; }
+        .welcome-title { font-size: 40px; font-weight: 300; color: #ffffff; margin: 0; }
+        .welcome-subtitle { font-size: 16px; color: #8c8c8c; margin: 0; }
+        .welcome-grid { display: flex; flex-direction: column; gap: 24px; margin-top: 10px; }
+        .welcome-group { display: flex; flex-direction: column; gap: 8px; }
+        .group-title { font-size: 14px; font-weight: 600; color: #e1e1e1; border-bottom: 1px solid #2b2b2b; padding-bottom: 6px; margin-bottom: 6px;}
+        
+        /* Botones azules nativos de acciones principales de inicio */
+        .welcome-blue-layout { display: flex; flex-direction: column; gap: 8px; max-width: 380px; margin-top: 5px; }
+        .btn-welcome-primary {
+            background-color: #007acc; color: #ffffff; border: none; padding: 10px 16px;
+            font-size: 14px; font-family: inherit; border-radius: 2px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; font-weight: 500; text-align: left;
+        }
+        .btn-welcome-primary:hover { background-color: #0062a3; }
+        .btn-welcome-primary i { font-size: 18px; }
+
+        .welcome-right { flex: 0.8; display: flex; flex-direction: column; gap: 20px; border-left: 1px solid #2b2b2b; padding-left: 40px; }
+        .walkthrough-card { background-color: #181818; border: 1px solid #2b2b2b; border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+        .walkthrough-card:hover { border-color: #3c3c3c; }
+        .walkthrough-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .walkthrough-desc { font-size: 12px; color: #8c8c8c; line-height: 16px; }
+
+        #monaco-root { flex: 1; width: 100%; height: 100%; }
+
+        /* --- MODAL INTERNO IN-APP --- */
+        .app-modal { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding-top: 60px; }
+        .modal-box { background-color: #1f1f1f; width: 450px; max-width: 90%; border: 1px solid #3c3c3c; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 12px 16px; background-color: #181818; font-size: 13px; font-weight: bold; border-bottom: 1px solid #2b2b2b;}
+        .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .modal-body input { background-color: #2c2c2c; color: #ffffff; border: 1px solid #3c3c3c; padding: 8px 12px; font-size: 14px; border-radius: 4px; outline: none; }
+        .modal-body input:focus { border-color: #007acc; }
+        .modal-footer { padding: 12px 16px; display: flex; justify-content: flex-end; gap: 10px; background-color: #181818; }
+        .btn-secondary { background-color: #313131; color: #ffffff; border: 1px solid #414141; padding: 6px 14px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+
+        /* --- BARRA INFERIOR GRIS MODERN --- */
+        .status-bar { height: 22px; background-color: #1f1f1f; color: #cccccc; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 12px; border-top: 1px solid #2b2b2b; z-index: 4; }
+        .status-left, .status-right { display: flex; align-items: center; gap: 14px; }
+        .status-item { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 0 6px; height: 22px; }
+        .status-item:hover { background-color: #2d2d2d; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="window-frame">
+    <div class="title-bar">
+        <div class="title-left">
+            <img src="https://code.visualstudio.com/favicon.ico" alt="VS Code Logo">
+            <div class="nav-controls">
+                <i class="codicon codicon-arrow-left"></i>
+                <i class="codicon codicon-arrow-right"></i>
+            </div>
+        </div>
+        <div class="title-center" id="moving-title-indicator">
+            <i class="codicon codicon-vscode"></i> Visual Studio Code - Inicio
+        </div>
+        <div class="title-right">
+            <i class="codicon codicon-layout-sidebar-left"></i>
+            <i class="codicon codicon-panel-bottom"></i>
+        </div>
+    </div>
+
+    <div class="main-container">
         
-        <header class="top-status-bar">
-            <div class="top-left">
-                <div class="top-item" style="color: #ffffff; font-weight: 600;">
-                    <i data-lucide="terminal" size="13"></i>
-                    <span>Pro Environment</span>
-                </div>
-                <div class="top-item">
-                    <i data-lucide="git-branch" size="13"></i>
-                    <span>main</span>
-                </div>
+        <div class="activity-bar">
+            <div class="activity-top">
+                <div class="act-icon active" data-target="panel-explorer" title="Explorador"><i class="codicon codicon-files"></i></div>
+                <div class="act-icon" data-target="panel-search" title="Buscar"><i class="codicon codicon-search"></i></div>
+                <div class="act-icon" data-target="panel-git" title="Control de código fuente"><i class="codicon codicon-source-control"></i></div>
+                <div class="act-icon" data-target="panel-debug" title="Ejecutar y depurar"><i class="codicon codicon-debug-alt"></i></div>
             </div>
-            <div class="top-right">
-                <div class="top-item id-engine" id="engineIndicator">HTML Engine</div>
-                <div class="top-item" id="extIndicator">Ext: 0 Activas</div>
-                <div class="top-item live-btn" id="liveServerBtn">
-                    <i data-lucide="radio" size="13"></i>
-                    <span id="liveServerText">Go Live</span>
-                </div>
+            <div class="activity-bottom">
+                <div class="act-icon" title="Perfil"><i class="codicon codicon-account"></i></div>
+                <div class="act-icon" title="Configuración"><i class="codicon codicon-settings-gear"></i></div>
             </div>
-        </header>
+        </div>
 
-        <div class="app-container">
-            
-            <aside class="activity-bar">
-                <div class="activity-group">
-                    <div class="activity-btn active" data-target="explorer" title="Explorador">
-                        <i data-lucide="files" size="20"></i>
-                    </div>
-                    <div class="activity-btn" data-target="search" title="Buscar">
-                        <i data-lucide="search" size="20"></i>
-                    </div>
-                    <div class="activity-btn" data-target="extensions" title="Extensiones">
-                        <i data-lucide="blocks" size="20"></i>
-                    </div>
-                </div>
-                <div class="activity-group">
-                    <div class="activity-btn" title="Configuración">
-                        <i data-lucide="settings" size="20"></i>
-                    </div>
-                </div>
-            </aside>
-
-            <aside class="sidebar">
-                <div class="brand-logo">
-                    <span class="colored">Devy</span><span class="white">Pro</span>
+        <div class="sidebar">
+            <div id="panel-explorer" class="panel-content active">
+                <div class="sidebar-header">
+                    <span>EXPLORADOR</span>
+                    <i class="codicon codicon-ellipsis"></i>
                 </div>
                 
-                <div id="panel-explorer" class="panel-section active">
-                    <div class="sidebar-header">
-                        <span>Explorador</span>
-                        <div class="sidebar-tools">
-                            <button class="tool-btn" id="newFileBtn" title="Nuevo Archivo...">
-                                <i data-lucide="file-plus" size="14"></i>
-                            </button>
+                <div class="sidebar-section-title">
+                    <span>SIN CARPETA ABIERTA</span>
+                    <div class="section-actions-grey">
+                        <i class="codicon codicon-new-file" onclick="openNamingModal()" title="Nuevo archivo"></i>
+                        <i class="codicon codicon-new-folder" onclick="alert('Carpetas administradas por volumen local')" title="Nueva carpeta"></i>
+                        <i class="codicon codicon-refresh" onclick="renderFileTree()" title="Refrescar"></i>
+                    </div>
+                </div>
+
+                <div class="empty-explorer-container" id="empty-sidebar-view">
+                    <div class="empty-explorer-text">Aún no has abierto una carpeta o creado ficheros en tu espacio de trabajo actual.</div>
+                    <button class="btn-sidebar-action" onclick="openNamingModal()">Abrir / Crear Archivo</button>
+                    <button class="btn-sidebar-secondary" onclick="document.getElementById('welcome-panel').style.display='flex'">Página de Bienvenida</button>
+                </div>
+
+                <div class="file-tree" id="file-list-container"></div>
+            </div>
+            
+            <div id="panel-search" class="panel-content"><div class="sidebar-header"><span>BUSCAR</span></div></div>
+            <div id="panel-git" class="panel-content"><div class="sidebar-header"><span>GIT SCM</span></div></div>
+            <div id="panel-debug" class="panel-content"><div class="sidebar-header"><span>RUN & DEBUG</span></div></div>
+        </div>
+
+        <div class="editor-area">
+            <div class="tabs-container" id="tabs-bar" style="display: none;"></div>
+
+            <div class="welcome-screen" id="welcome-panel">
+                <div class="welcome-left">
+                    <h1 class="welcome-title">Visual Studio Code</h1>
+                    <p class="welcome-subtitle">Edición de código profesional. Optimizada sin cuentas externas.</p>
+                    
+                    <div class="welcome-grid">
+                        <div class="welcome-group">
+                            <div class="group-title">Comenzar</div>
+                            
+                            <div class="welcome-blue-layout">
+                                <button class="btn-welcome-primary" onclick="openNamingModal()">
+                                    <i class="codicon codicon-new-file"></i> Nuevo archivo...
+                                </button>
+                                <button class="btn-welcome-primary" onclick="openNamingModal()">
+                                    <i class="codicon codicon-folder-opened"></i> Abrir carpeta de trabajo local...
+                                </button>
+                                <button class="btn-welcome-primary" onclick="alert('Repositorio Git virtualizado configurado localmente.')">
+                                    <i class="codicon codicon-repo-clone"></i> Clonar repositorio Git...
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="welcome-group">
+                            <div class="group-title">Ficheros Recientes</div>
+                            <div id="recent-list" style="display:flex; flex-direction:column; gap:6px;">
+                                <span style="font-size: 13px; color: #6a6a6a; padding-left: 2px;">No hay documentos recientes. Crea uno para empezar.</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="sidebar-content" id="fileTreeContainer"></div>
                 </div>
-
-                <div id="panel-search" class="panel-section">
-                    <div class="sidebar-header"><span>Buscar global</span></div>
-                    <div class="search-input-box">
-                        <input type="text" class="sidebar-input" placeholder="Buscar texto en workspace...">
-                    </div>
-                    <div class="panel-placeholder">Resultados indexados en tiempo real...</div>
-                </div>
-
-                <div id="panel-extensions" class="panel-section">
-                    <div class="sidebar-header"><span>Marketplace</span></div>
-                    <div class="search-input-box">
-                        <input type="text" class="sidebar-input" id="extSearch" placeholder="Buscar extensiones...">
-                    </div>
-                    <div class="sidebar-content" id="extensionsContainer"></div>
-                </div>
-            </aside>
-
-            <main class="main-editor-zone">
-                <div class="tabs-bar" id="tabsBar"></div>
-
-                <div class="editor-workspace">
-                    <div id="editor-container"></div>
-                </div>
-
-                <div class="bottom-panel">
-                    <div class="panel-tabs">
-                        <div class="panel-tab active">Terminal</div>
-                        <div class="panel-tab">Problemas</div>
-                        <div class="panel-tab">Output</div>
-                    </div>
-                    <div class="panel-body" id="terminalOutput">
-                        devy@workspace:~$ Entorno Devy Pro v2.5 cargado de forma óptima con Monaco Engine.
+                
+                <div class="welcome-right">
+                    <div class="group-title">Flujos de Trabajo</div>
+                    <div class="walkthrough-card" onclick="openNamingModal()">
+                        <div class="walkthrough-title">Soporte de Extensiones Nativas</div>
+                        <div class="walkthrough-desc">Crea un archivo acabado en las extensiones oficiales para inicializar el resaltado exacto de Microsoft.</div>
                     </div>
                 </div>
-            </main>
+            </div>
+
+            <div id="monaco-root"></div>
         </div>
+
+        <div class="app-modal" id="naming-modal">
+            <div class="modal-box">
+                <div class="modal-header">Nuevo Archivo</div>
+                <div class="modal-body">
+                    <span style="font-size: 13px; color: #cccccc;">Introduce nombre con extensión (.js, .html, .css, .json):</span>
+                    <input type="text" id="modal-input-name" placeholder="ejemplo: index.js" autocomplete="off">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeNamingModal()">Cancelar</button>
+                    <button class="btn-sidebar-action" style="padding: 6px 14px;" onclick="confirmFileCreation()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="context-menu" id="customContextMenu">
-        <div class="context-menu-item" id="deleteFileAction">
-            <i data-lucide="trash-2" size="12"></i> Eliminar Archivo
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="status-item" style="background-color: #2b2b2b;"><i class="codicon codicon-remote"></i></div>
+            <div class="status-item"><i class="codicon codicon-git-branch"></i> main</div>
+            <div class="status-item"><i class="codicon codicon-sync"></i> Sincronizado</div>
+        </div>
+        <div class="status-right">
+            <div class="status-item">UTF-8</div>
+            <div class="status-item" id="syntax-indicator">Plain Text</div>
+            <div class="status-item"><i class="codicon codicon-bell"></i></div>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 
     <script>
-        // Estructura de archivos inicial
-        let fileSystem = {
-            'file_1': { name: 'index.html', content: '<!DOCTYPE html>\n<html>\n<head>\n\t<title>Devy Pro</title>\n</head>\n<body>\n\t<h1>Hola Mundo desde Devy</h1>\n</body>\n</html>' },
-            'file_2': { name: 'styles.css', content: 'body {\n\tbackground: #121212;\n\tcolor: white;\n}' }
-        };
-        let activeFileId = 'file_1';
-        let contextTargetFileId = null;
-        let liveWindow = null;
-        let monacoEditorInstance = null;
+        let editorInstance = null;
+        let workspaceFiles = JSON.parse(localStorage.getItem('vscode_ultimate_workspace')) || {};
+        let currentActiveFile = null;
 
-        // Base de Datos de Extensiones
-        let extensionsData = [
-            { id: 'prettier', name: 'Prettier Formatter', desc: 'Formatea automáticamente tu código al guardar o escribir.', installed: false, type: 'formatter' },
-            { id: 'brackets', name: 'Bracket Pair Colorizer', desc: 'Colorea corchetes y llaves para no perderte.', installed: false, type: 'ui' },
-            { id: 'materialIcons', name: 'Material Icon Theme', desc: 'Cambia los iconos genéricos por los oficiales detallados.', installed: false, type: 'icons' },
-            { id: 'autoprefixer', name: 'CSS Auto-Prefixer', desc: 'Añade sugerencias avanzadas de Webkit/Moz a tu CSS.', installed: false, type: 'suggest' }
-        ];
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
 
-        const suggestionsDictionary = [
-            { trigger: '<doc', replace: '<!DOCTYPE html>\n<html lang="es">\n<head>\n\t<meta charset="UTF-8">\n\t<title>Documento</title>\n</head>\n<body>\n\t$0\n</body>\n</html>', label: '<!DOCTYPE html>', type: 'Estructura' },
-            { trigger: '<html', replace: '<html lang="es">\n\t$0\n</html>', label: '<html>', type: 'Tag Base' },
-            { trigger: '<div', replace: '<div class="$0"></div>', label: '<div> con clase', type: 'Contenedor' },
-            { trigger: '<section', replace: '<section id="$0">\n\t\n</section>', label: '<section>', type: 'Semántico' },
-            { trigger: '<script', replace: '<script src="$0"><\/script>', label: '<script src="">', type: 'Enlace Script' },
-            { trigger: '<link', replace: '<link rel="stylesheet" href="$0">', label: '<link css>', type: 'Enlace CSS' },
-            { trigger: 'console.log', replace: 'console.log($0);', label: 'console.log()', type: 'JS Output' },
-            { trigger: 'addEventListener', replace: 'addEventListener(\'$0\', (e) => {\n\t\n});', label: 'addEventListener', type: 'JS Evento' },
-            { trigger: 'fetch', replace: 'fetch(\'$0\')\n\t.then(res => res.json())\n\t.then(data => console.log(data));', label: 'fetch() API', type: 'JS Async' },
-            { trigger: 'function', replace: 'function $0() {\n\t\n}', label: 'function standard', type: 'JS Estructura' },
-            { trigger: 'display: flex', replace: 'display: flex;\njustify-content: center;\nalign-items: center;$0', label: 'flex-center', type: 'CSS Layout' },
-            { trigger: 'box-shadow', replace: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);$0', label: 'box-shadow premium', type: 'CSS Efecto' },
-            { trigger: 'background-image', replace: 'background: linear-gradient(135deg, #007acc, #1f85de);$0', label: 'gradient-blue', type: 'CSS Diseño' }
-        ];
-
-        // Elementos DOM
-        const fileTreeContainer = document.getElementById('fileTreeContainer');
-        const tabsBar = document.getElementById('tabsBar');
-        const newFileBtn = document.getElementById('newFileBtn');
-        const customContextMenu = document.getElementById('customContextMenu');
-        const deleteFileAction = document.getElementById('deleteFileAction');
-        const liveServerBtn = document.getElementById('liveServerBtn');
-        const liveServerText = document.getElementById('liveServerText');
-        const terminalOutput = document.getElementById('terminalOutput');
-        const engineIndicator = document.getElementById('engineIndicator');
-        const extensionsContainer = document.getElementById('extensionsContainer');
-        const extIndicator = document.getElementById('extIndicator');
-
-        // Control de Pestañas Sidebar
-        document.querySelectorAll('.activity-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const target = btn.getAttribute('data-target');
-                if (!target) return;
-                document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
-                document.getElementById(`panel-${target}`).classList.add('active');
+        // Intercambio reactivo de paneles laterales
+        const actIcons = document.querySelectorAll('.activity-top .act-icon');
+        actIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                actIcons.forEach(i => i.classList.remove('active'));
+                icon.classList.add('active');
+                document.querySelectorAll('.sidebar .panel-content').forEach(p => p.classList.remove('active'));
+                document.getElementById(icon.getAttribute('data-target')).classList.add('active');
             });
         });
 
-        // INICIALIZACIÓN MONACO
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-        
-        require(['vs/editor/editor.main'], function() {
-            monaco.languages.registerCompletionItemProvider('javascript', {
-                provideCompletionItems: () => ({
-                    suggestions: suggestionsDictionary.map(s => ({
-                        label: s.label,
-                        kind: monaco.languages.CompletionItemKind.Snippet,
-                        documentation: s.type,
-                        insertText: s.replace.replace('$0', ''),
-                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                    }))
-                })
-            });
-            monaco.languages.registerCompletionItemProvider('html', {
-                provideCompletionItems: () => ({
-                    suggestions: suggestionsDictionary.map(s => ({
-                        label: s.label,
-                        kind: monaco.languages.CompletionItemKind.Snippet,
-                        documentation: s.type,
-                        insertText: s.replace.replace('$0', ''),
-                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                    }))
-                })
-            });
-
-            monacoEditorInstance = monaco.editor.create(document.getElementById('editor-container'), {
-                theme: 'vs-dark',
-                fontSize: 14,
-                fontFamily: 'var(--font-mono)',
-                automaticLayout: true,
-                suggestOnTriggerCharacters: true,
-                minimap: { enabled: true }
-            });
-
-            monacoEditorInstance.onDidChangeModelContent(() => {
-                if (fileSystem[activeFileId]) {
-                    fileSystem[activeFileId].content = monacoEditorInstance.getValue();
-                }
-            });
-
-            renderWorkspace();
-        });
-
-        function renderWorkspace() {
+        function initWorkspace() {
             renderFileTree();
-            renderTabs();
-            loadActiveFile();
-            renderExtensions();
+            updateRecentList();
+            const keys = Object.keys(workspaceFiles);
+            if (keys.length > 0) openFile(keys[0]);
+        }
+
+        // RETORNA EL ICONO REAL SEGÚN LA EXTENSIÓN CON SU ESTILO DE ÚLTIMA VERSIÓN
+        function getOfficialIconHTML(filename) {
+            if (filename.endsWith('.js')) return `<i class="icon-js" style="font-family:sans-serif; font-weight:bold;">JS</i>`;
+            if (filename.endsWith('.html')) return `<i class="codicon codicon-code icon-html"></i>`; // Ganchos/etiquetas angulares reales
+            if (filename.endsWith('.css')) return `<i class="codicon codicon-symbol-keyword icon-css"></i>`; // Símbolo almohadilla/numeral
+            if (filename.endsWith('.json')) return `<i class="codicon codicon-json icon-json"></i>`; // Llaves estructuradas
+            return `<i class="codicon codicon-file"></i>`;
+        }
+
+        function getLanguageMode(filename) {
+            if (filename.endsWith('.html')) return 'html';
+            if (filename.endsWith('.css')) return 'css';
+            if (filename.endsWith('.json')) return 'json';
+            return 'javascript';
         }
 
         function renderFileTree() {
-            fileTreeContainer.innerHTML = '';
-            for (let id in fileSystem) {
-                const file = fileSystem[id];
-                const hasIconsExt = extensionsData.find(e => e.id === 'materialIcons').installed;
-                
-                let iconName = 'file';
-                let iconClass = 'icon-generic';
-                
-                if (file.name.endsWith('.html')) { iconName = 'file-code'; iconClass = 'icon-file'; }
-                else if (file.name.endsWith('.js')) { iconName = hasIconsExt ? 'braces' : 'file'; iconClass = 'icon-js'; }
-                else if (file.name.endsWith('.css')) { iconName = hasIconsExt ? 'palette' : 'file'; iconClass = 'icon-css'; }
-
-                const div = document.createElement('div');
-                div.className = `tree-item ${id === activeFileId ? 'active' : ''}`;
-                div.setAttribute('data-id', id);
-                div.innerHTML = `
-                    <div class="file-info">
-                        <i data-lucide="${iconName}" size="15" class="${iconClass}"></i>
-                        <span>${file.name}</span>
-                    </div>
-                    <div class="file-options-trigger" data-id="${id}">
-                        <i data-lucide="more-horizontal" size="14"></i>
-                    </div>
-                `;
-                div.addEventListener('click', (e) => {
-                    if (e.target.closest('.file-options-trigger')) return;
-                    activeFileId = id;
-                    renderWorkspace();
-                });
-                fileTreeContainer.appendChild(div);
-            }
-
-            document.querySelectorAll('.file-options-trigger').forEach(trigger => {
-                trigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    contextTargetFileId = trigger.getAttribute('data-id');
-                    const rect = trigger.getBoundingClientRect();
-                    customContextMenu.style.top = `${rect.bottom + window.scrollY}px`;
-                    customContextMenu.style.left = `${rect.left - 120 + window.scrollX}px`;
-                    customContextMenu.style.display = 'block';
-                });
-            });
-            lucide.createIcons();
-        }
-
-        function renderTabs() {
-            tabsBar.innerHTML = '';
-            for (let id in fileSystem) {
-                if(id === activeFileId) {
-                    const tab = document.createElement('div');
-                    tab.className = 'tab active';
-                    tab.innerHTML = `<span>${fileSystem[id].name}</span>`;
-                    tabsBar.appendChild(tab);
-                }
-            }
-        }
-
-        function getLangType(name) {
-            if (name.endsWith('.html')) return 'html';
-            if (name.endsWith('.css')) return 'css';
-            if (name.endsWith('.js')) return 'javascript';
-            return 'plaintext';
-        }
-
-        function loadActiveFile() {
-            if (!monacoEditorInstance) return;
-
-            if (fileSystem[activeFileId]) {
-                const file = fileSystem[activeFileId];
-                const currentLang = getLangType(file.name);
-                const model = monaco.editor.createModel(file.content, currentLang);
-                monacoEditorInstance.setModel(model);
-
-                if (file.name.endsWith('.html')) engineIndicator.innerText = 'HTML V8 Engine';
-                else if (file.name.endsWith('.css')) engineIndicator.innerText = 'CSS Compiler';
-                else engineIndicator.innerText = 'JS Runtime';
-            } else {
-                monacoEditorInstance.setValue('');
-                engineIndicator.innerText = 'Null';
-            }
-        }
-
-        function renderExtensions() {
-            extensionsContainer.innerHTML = '';
-            let activeCount = 0;
+            const container = document.getElementById('file-list-container');
+            const emptyView = document.getElementById('empty-sidebar-view');
+            container.innerHTML = '';
             
-            extensionsData.forEach(ext => {
-                if (ext.installed) activeCount++;
-                const card = document.createElement('div');
-                card.className = 'extension-card';
-                card.innerHTML = `
-                    <div class="ext-icon"><i data-lucide="puzzle" size="16"></i></div>
-                    <div class="ext-info">
-                        <div class="ext-title">${ext.name}</div>
-                        <div class="ext-desc">${ext.desc}</div>
-                        <button class="ext-btn ${ext.installed ? 'installed' : ''}" data-id="${ext.id}">
-                            ${ext.installed ? 'Desinstalar' : 'Instalar'}
-                        </button>
-                    </div>
-                `;
-                extensionsContainer.appendChild(card);
-            });
-
-            extIndicator.innerText = `Ext: ${activeCount} Activas`;
-
-            document.querySelectorAll('.ext-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-id');
-                    const ext = extensionsData.find(e => e.id === id);
-                    ext.installed = !ext.installed;
-                    if (ext.installed) {
-                        terminalOutput.innerText += `\n📦 [Extensiones] "${ext.name}" activada con éxito.`;
-                    }
-                    renderWorkspace();
+            const fileKeys = Object.keys(workspaceFiles);
+            if(fileKeys.length === 0) {
+                emptyView.style.display = "flex";
+                container.style.display = "none";
+            } else {
+                emptyView.style.display = "none";
+                container.style.display = "block";
+                
+                fileKeys.forEach(filename => {
+                    const item = document.createElement('div');
+                    item.className = `file-item ${filename === currentActiveFile ? 'active' : ''}`;
+                    item.innerHTML = `${getOfficialIconHTML(filename)} <span>${filename}</span>`;
+                    item.onclick = () => openFile(filename);
+                    container.appendChild(item);
                 });
-            });
-            lucide.createIcons();
+            }
         }
 
-        newFileBtn.addEventListener('click', () => {
-            const name = prompt('Nombre del archivo:');
-            if(name) {
-                const id = 'file_' + Date.now();
-                fileSystem[id] = { name: name, content: '' };
-                activeFileId = id;
-                renderWorkspace();
+        function updateRecentList() {
+            const recentList = document.getElementById('recent-list');
+            const fileKeys = Object.keys(workspaceFiles);
+            if(fileKeys.length > 0) {
+                recentList.innerHTML = "";
+                fileKeys.slice(-3).forEach(filename => {
+                    const action = document.createElement('div');
+                    action.className = "welcome-action";
+                    action.innerHTML = `${getOfficialIconHTML(filename)} ${filename}`;
+                    action.onclick = () => openFile(filename);
+                    recentList.appendChild(action);
+                });
             }
-        });
+        }
 
-        deleteFileAction.addEventListener('click', () => {
-            if(contextTargetFileId && Object.keys(fileSystem).length > 1) {
-                delete fileSystem[contextTargetFileId];
-                if(activeFileId === contextTargetFileId) {
-                    activeFileId = Object.keys(fileSystem)[0];
+        function openNamingModal() {
+            const modal = document.getElementById('naming-modal');
+            const input = document.getElementById('modal-input-name');
+            input.value = "index.js";
+            modal.style.display = "flex";
+            input.focus();
+        }
+
+        function closeNamingModal() { document.getElementById('naming-modal').style.display = "none"; }
+
+        function confirmFileCreation() {
+            const input = document.getElementById('modal-input-name');
+            let filename = input.value.trim();
+            if (!filename) return;
+
+            if (workspaceFiles[filename]) {
+                alert("El archivo ya existe.");
+                return;
+            }
+
+            workspaceFiles[filename] = {
+                content: filename.endsWith('.html') ? "\n<!DOCTYPE html>\n<html>\n<body>\n\n</body>\n</html>" : `// Entorno de desarrollo: ${filename}\n\n`,
+                language: getLanguageMode(filename)
+            };
+            
+            localStorage.setItem('vscode_ultimate_workspace', JSON.stringify(workspaceFiles));
+            closeNamingModal();
+            renderFileTree();
+            updateRecentList();
+            openFile(filename);
+        }
+
+        function openFile(filename) {
+            currentActiveFile = filename;
+            document.getElementById('welcome-panel').style.display = 'none';
+            
+            const tabsBar = document.getElementById('tabs-bar');
+            tabsBar.style.display = 'flex';
+            
+            tabsBar.innerHTML = `
+                <div class="tab active">
+                    ${getOfficialIconHTML(filename)}
+                    <span>${filename}</span>
+                    <i class="codicon codicon-close close-icon" onclick="closeCurrentFile(event)"></i>
+                </div>
+            `;
+
+            document.getElementById('moving-title-indicator').innerHTML = `src > ${filename}`;
+            document.getElementById('syntax-indicator').innerText = workspaceFiles[filename].language.toUpperCase();
+
+            require(['vs/editor/editor.main'], function () {
+                if (!editorInstance) {
+                    editorInstance = monaco.editor.create(document.getElementById('monaco-root'), {
+                        value: workspaceFiles[filename].content,
+                        language: workspaceFiles[filename].language,
+                        theme: 'vs-dark',
+                        fontFamily: '"Cascadia Code", "Fira Code", "Segoe UI", monospace',
+                        fontSize: 15,
+                        automaticLayout: true
+                    });
+
+                    editorInstance.onDidChangeModelContent(() => {
+                        if (currentActiveFile) {
+                            workspaceFiles[currentActiveFile].content = editorInstance.getValue();
+                            localStorage.setItem('vscode_ultimate_workspace', JSON.stringify(workspaceFiles));
+                        }
+                    });
+                } else {
+                    let oldModel = editorInstance.getModel();
+                    if (oldModel) oldModel.dispose();
+                    
+                    let newModel = monaco.editor.createModel(workspaceFiles[filename].content, workspaceFiles[filename].language);
+                    editorInstance.setModel(newModel);
+                    
+                    newModel.onDidChangeModelContent(() => {
+                        if (currentActiveFile) {
+                            workspaceFiles[currentActiveFile].content = editorInstance.getValue();
+                            localStorage.setItem('vscode_ultimate_workspace', JSON.stringify(workspaceFiles));
+                        }
+                    });
                 }
-                contextTargetFileId = null;
-                renderWorkspace();
-            }
-        });
+            });
+            renderFileTree();
+        }
 
-        window.addEventListener('click', () => { customContextMenu.style.display = 'none'; });
-
-        // LIVE SERVER DESDE LA PARTE SUPERIOR
-        liveServerBtn.addEventListener('click', () => {
-            if(liveWindow && !liveWindow.closed) {
-                liveWindow.close();
-                liveServerBtn.classList.remove('running');
-                liveServerText.innerText = "Go Live";
-                terminalOutput.innerText += "\n📡 [Live Server] Servicio detenido.";
-            } else {
-                liveWindow = window.open('', '_blank');
-                let html = fileSystem['file_1'] ? fileSystem['file_1'].content : '<h1>No index.html</h1>';
-                let css = fileSystem['file_2'] ? fileSystem['file_2'].content : '';
-                let inject = `<style>${css}</style>${html}`;
-                liveWindow.document.write(inject);
-                liveWindow.document.close();
-                
-                liveServerBtn.classList.add('running');
-                liveServerText.innerText = "Port: 5500";
-                terminalOutput.innerText += "\n📡 [Live Server] Desplegado en http://127.0.0.1:5500";
+        function closeCurrentFile(event) {
+            event.stopPropagation();
+            if (editorInstance) {
+                let model = editorInstance.getModel();
+                if (model) model.dispose();
             }
-        });
+            currentActiveFile = null;
+            document.getElementById('tabs-bar').style.display = 'none';
+            document.getElementById('welcome-panel').style.display = 'flex';
+            document.getElementById('moving-title-indicator').innerHTML = `<i class="codicon codicon-vscode"></i> Visual Studio Code - Inicio`;
+            renderFileTree();
+        }
+
+        window.onload = initWorkspace;
     </script>
 </body>
 </html>
